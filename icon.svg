@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 33.866666 33.866666"
+   version="1.1"
+   id="svg5"
+   inkscape:export-filename="bitmap.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   sodipodi:docname="icon.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1.0746575"
+     inkscape:cx="-19.075846"
+     inkscape:cy="-1.8610581"
+     inkscape:window-width="1920"
+     inkscape:window-height="999"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <rect
+       x="11.24687"
+       y="25.433633"
+       width="152.77828"
+       height="98.848862"
+       id="rect236" />
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       aria-label="TM"
+       transform="matrix(0.26458333,0,0,0.26458333,2.5489783,1.4621958)"
+       id="text234"
+       style="font-weight:600;font-size:80px;line-height:1;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro Semi-Bold';white-space:pre;shape-inside:url(#rect236);stroke-width:1.13386;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:2;stop-color:#000000">
+      <rect
+         style="font-weight:600;font-size:80px;line-height:1;font-family:'Myriad Pro';-inkscape-font-specification:'Myriad Pro Semi-Bold';white-space:pre;shape-inside:url(#rect236);stroke-width:0.3;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:2;stop-color:#000000;fill:#dddddd;fill-opacity:1"
+         id="rect17737"
+         width="33.866665"
+         height="33.866665"
+         x="0"
+         y="0"
+         transform="matrix(3.7795276,0,0,3.7795276,-9.6339339,-5.5264094)" />
+      <path
+         id="path14171"
+         d="M 191.68443 -17.532269 C 191.62375 -17.532008 191.48337 -17.526899 191.41685 -17.52641 L 192.6024 -17.52641 C 192.6024 -17.52641 192.28988 -17.534876 191.68443 -17.532269 z M 191.41685 -17.52641 L -21.633934 -17.52641 L -21.633934 194.54586 C -21.282195 177.58309 -16.691483 120.36265 27.246926 66.977498 L 27.246926 39.752888 L 11.885598 39.752888 L 11.885598 31.512654 L 42.926614 31.512654 L 55.885598 31.512654 L 57.52427 36.555622 C 118.88319 -15.084788 182.31832 -17.459524 191.41685 -17.52641 z M 57.52427 36.555622 C 55.146227 38.557012 52.771458 40.633949 50.403176 42.786091 C 51.972866 48.849096 54.414564 55.590883 56.285989 61.752888 L 63.485208 84.793904 L 71.006692 84.793904 L 78.926614 61.434529 C 81.326609 54.66121 83.460339 47.780557 85.327005 40.793904 L 85.565286 40.793904 C 85.511956 45.487227 85.725913 53.034549 86.205911 63.434529 L 87.246927 85.434529 L 96.846536 85.434529 L 93.725442 31.512654 L 80.926614 31.512654 L 73.485208 53.114216 C 71.565212 58.980871 69.779162 65.24639 68.125833 71.913045 L 67.885598 71.913045 C 66.445602 65.619724 64.793277 59.380949 62.926614 53.194294 L 58.627786 39.95406 L 57.52427 36.555622 z M 50.403176 42.786091 C 50.146714 41.795494 49.907168 40.818668 49.703958 39.870076 L 37.08677 39.752888 L 37.08677 55.831013 C 38.56311 54.265985 40.062875 52.704517 41.614114 51.153279 C 44.529072 48.23832 47.461773 45.459049 50.403176 42.786091 z M 37.08677 55.831013 C 33.609118 59.517579 30.326177 63.236208 27.246926 66.977498 L 27.246926 85.434529 L 37.08677 85.434529 L 37.08677 55.831013 z M -21.633934 194.54586 C -21.700737 197.76747 -21.633934 199.70992 -21.633934 199.70992 L -21.633934 194.54586 z " />
+    </g>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Layer 2"
+     style="mix-blend-mode:normal" />
+</svg>

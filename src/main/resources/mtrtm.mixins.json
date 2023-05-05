@@ -1,0 +1,21 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.lx.mtrtm.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "PacketTrainDataGuiServerMixin",
+    "RailwayDataPathGenerationModuleAccessorMixin",
+    "RailwayDataPathGenerationModuleMixin",
+    "RailwayDataRouteFinderModuleMixin",
+    "SidingAccessorMixin",
+    "TrainAccessorMixin",
+    "TrainServerAccessorMixin",
+    "TrainServerMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}
