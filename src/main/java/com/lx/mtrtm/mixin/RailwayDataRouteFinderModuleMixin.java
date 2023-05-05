@@ -16,8 +16,6 @@ public class RailwayDataRouteFinderModuleMixin {
     public void tick(CallbackInfo ci) {
         if(Config.mtrJourneyPlannerTickTime == -1 || (Config.mtrJourneyPlannerTickTime != 0 && !MTR.isGameTickInterval(Config.mtrJourneyPlannerTickTime))) {
             ci.cancel();
-        } else {
-            System.out.println("Tick");
         }
     }
 }
