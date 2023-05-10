@@ -19,11 +19,12 @@ public class ExposedTrainData {
     public Set<UUID> ridingEntities;
     public SimpleInventory inventory;
 
-    public ExposedTrainData(TrainServer server, long routeId, Vec3d[] positions, boolean isManual, SimpleInventory inventory) {
+    public ExposedTrainData(TrainServer server, long routeId, Vec3d[] positions, boolean isManual, SimpleInventory inventory, Set<UUID> ridingEntities) {
         this.train = server;
         this.routeId = routeId;
         this.positions = positions;
         this.isManual = isManual;
         this.inventory = inventory;
+        this.ridingEntities = ridingEntities;
     }
 }

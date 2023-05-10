@@ -40,7 +40,7 @@ public class Util {
                     positions[i] = ((TrainAccessorMixin)train).getTheRoutePosition(((TrainAccessorMixin) train).getReversed() ? train.trainCars - i : i, train.spacing);
                 }
 
-                trainDataList.add(new ExposedTrainData(train, ((TrainServerAccessorMixin)train).getRouteId(), positions, ((TrainAccessorMixin)train).getIsManualAllowed(), ((TrainAccessorMixin)train).getInventory()));
+                trainDataList.add(new ExposedTrainData(train, ((TrainServerAccessorMixin)train).getRouteId(), positions, ((TrainAccessorMixin)train).getIsManualAllowed(), ((TrainAccessorMixin)train).getInventory(), ((TrainAccessorMixin)train).getRidingEntities()));
             }
         }
 
@@ -77,7 +77,6 @@ public class Util {
             trainData.isCurrentlyManual = ((TrainAccessorMixin)trainData.train).getIsCurrentlyManual();
             if(trainData.isCurrentlyManual) {
                 trainData.accelerationSign = ((TrainAccessorMixin) trainData.train).getManualNotch();
-                trainData.ridingEntities = ((TrainAccessorMixin) trainData.train).getRidingEntities();
                 trainData.manualCooldown = ((TrainServerAccessorMixin)trainData.train).getManualCoolDown();
                 trainData.manualToAutomaticTime = ((TrainAccessorMixin) trainData.train).getManualToAutomaticTime();
             }
