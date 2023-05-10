@@ -26,7 +26,7 @@ def yarn_mappings = new JsonSlurper().parse(("https://meta.fabricmc.net/v2/versi
 def loader_version = project.loader_version
 def fapi_version = getModrinthVersion("fabric", minecraft_version, "fabric-api")
 
-version = minecraft_version + "-" + project.mod_version
+version = project.mod_version + "+" + "mc" + minecraft_version
 
 repositories {
 	// Add repositories to retrieve artifacts from in here.
