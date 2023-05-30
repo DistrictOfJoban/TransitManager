@@ -50,23 +50,26 @@ public class train {
                         .executes(context -> deploy(context))
                 )
                 .then(CommandManager.literal("jump")
+                        .then(CommandManager.literal("siding")
+                                .executes(context -> jump(context, true, false, false, false, true))
+                        )
                         .then(CommandManager.literal("next")
                                 .then(CommandManager.literal("platform")
-                                        .executes(context -> jump(context, true, false, true, false))
+                                        .executes(context -> jump(context, true, false, true, false, false))
                                 )
                                 .then(CommandManager.literal("path")
-                                        .executes(context -> jump(context, true, true, false, false))
+                                        .executes(context -> jump(context, true, true, false, false, false))
                                 )
                                 .then(CommandManager.literal("stopPosition")
-                                        .executes(context -> jump(context, true, false, false, true))
+                                        .executes(context -> jump(context, true, false, false, true, false))
                                 )
                         )
                         .then(CommandManager.literal("previous")
                                 .then(CommandManager.literal("platform")
-                                        .executes(context -> jump(context, false, false, true, false))
+                                        .executes(context -> jump(context, false, false, true, false, false))
                                 )
                                 .then(CommandManager.literal("path")
-                                        .executes(context -> jump(context, false, true, false, false))
+                                        .executes(context -> jump(context, false, true, false, false, false))
                                 )
                         )
                 )
@@ -94,22 +97,25 @@ public class train {
         return 1;
     }
 
-    private static int jump(CommandContext<ServerCommandSource> context, boolean next, boolean isPath, boolean isPlatform, boolean isStop) {
+    private static int jump(CommandContext<ServerCommandSource> context, boolean next, boolean isPath, boolean isPlatform, boolean isNextStop, boolean isSiding) {
         ExposedTrainData trainData = getNearestTrainOrError(context);
         double currentRailProgress = trainData.train.getRailProgress();
         List<Double> distances = ((TrainAccessorMixin)trainData.train).getDistances();
 
         double targetDistance = -1;
 
-        if(isStop) {
-            targetDistance = ((TrainAccessorMixin)trainData.train).getNextStoppingIndex();
+        if(isNextStop) {
+            targetDistance = distances.get(((TrainAccessorMixin)trainData.train).getNextStoppingIndex());
+        } else if(isSiding) {
+            targetDistance = distances.get(0);
         } else {
             int i = 0;
             for(PathData path : trainData.train.path) {
-                if((isPlatform && path.rail.railType == RailType.PLATFORM) || isPath) {
+                boolean isStoppablePlatform = path.dwellTime > 0 && path.rail.railType == RailType.PLATFORM;
+                if((isPlatform && isStoppablePlatform) || isPath) {
                     double dist = distances.get(i);
-                    if(currentRailProgress < dist) {
-                        if(!next) dist = distances.get(Math.max(0, i-1));
+                    if(dist > currentRailProgress) {
+                        if(!next) dist = distances.get(Math.max(0, i - 2));
                         targetDistance = dist;
                         break;
                     }
