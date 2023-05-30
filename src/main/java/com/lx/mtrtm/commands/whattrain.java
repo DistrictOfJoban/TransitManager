@@ -8,6 +8,7 @@ import com.lx.mtrtm.mixin.TrainServerAccessorMixin;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import mtr.data.*;
+import mtr.path.PathData;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -19,6 +20,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class whattrain {
@@ -45,7 +47,6 @@ public class whattrain {
             trainData.isCurrentlyManual = ((TrainAccessorMixin)trainData.train).getIsCurrentlyManual();
             if(trainData.isCurrentlyManual) {
                 trainData.accelerationSign = ((TrainAccessorMixin) trainData.train).getManualNotch();
-                trainData.ridingEntities = ((TrainAccessorMixin) trainData.train).getRidingEntities();
                 trainData.manualCooldown = ((TrainServerAccessorMixin)trainData.train).getManualCoolDown();
                 trainData.manualToAutomaticTime = ((TrainAccessorMixin) trainData.train).getManualToAutomaticTime();
             }
@@ -95,17 +96,16 @@ public class whattrain {
         MutableText trainNotch = Mappings.literalText(trainData.accelerationSign == -2 ? "B2" : trainData.accelerationSign == -1 ? "B1" : trainData.accelerationSign == 0 ? "N" : trainData.accelerationSign == 1 ? "P1" : "P2").formatted(Formatting.GREEN);
         MutableText PMLeft = Mappings.literalText((Math.round((((trainData.manualToAutomaticTime * 10) - trainData.manualCooldown)) / 20F)) + "s").formatted(Formatting.GREEN);
 
-        StringBuilder ridingEntities = new StringBuilder();
-        if(trainData.ridingEntities != null) {
-            for (UUID uuid : trainData.ridingEntities) {
-                ServerPlayerEntity ridingPlayer = context.getSource().getServer().getPlayerManager().getPlayer(uuid);
-                if (ridingPlayer == null) continue;
+        Set<UUID> ridingEntities = ((TrainAccessorMixin)trainData.train).getRidingEntities();
+        StringBuilder ridingEntitiesStr = new StringBuilder();
+        for (UUID uuid : ((TrainAccessorMixin)trainData.train).getRidingEntities()) {
+            ServerPlayerEntity ridingPlayer = context.getSource().getServer().getPlayerManager().getPlayer(uuid);
+            if (ridingPlayer == null) continue;
 
-                ridingEntities.append(ridingPlayer.getGameProfile().getName()).append("\n");
-            }
+            ridingEntitiesStr.append(ridingPlayer.getGameProfile().getName()).append("\n");
         }
 
-        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Mappings.literalText(ridingEntities.toString()).formatted(Formatting.GREEN));
+        HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Mappings.literalText(ridingEntitiesStr.toString()).formatted(Formatting.GREEN));
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/traininv " + siding.id);
         context.getSource().sendFeedback(Mappings.literalText("===== Nearest Train =====").formatted(Formatting.GREEN), false);
         context.getSource().sendFeedback(Mappings.literalText("Mode: ").formatted(Formatting.GOLD).append(isManual), false);
@@ -115,11 +115,11 @@ public class whattrain {
         context.getSource().sendFeedback(Mappings.literalText("Train Type: ").formatted(Formatting.GOLD).append(trainType).append(trainCars), false);
         context.getSource().sendFeedback(Mappings.literalText("Position: ").formatted(Formatting.GOLD).append(pos), false);
 
-        if(trainData.ridingEntities != null && trainData.ridingEntities.size() > 0) {
+        if(ridingEntities.size() > 0) {
             context.getSource().sendFeedback(Mappings.literalText("Riding players: (Hover Here)").formatted(Formatting.GOLD).styled(style -> style.withHoverEvent(hoverEvent)), false);
         }
 
-        if(!trainData.inventory.isEmpty()) {
+        if(!((TrainAccessorMixin)trainData.train).getInventory().isEmpty()) {
             context.getSource().sendFeedback(Mappings.literalText("Train Inventory: (Click Here)").formatted(Formatting.GOLD).styled(style -> style.withClickEvent(clickEvent)), false);
         }
 

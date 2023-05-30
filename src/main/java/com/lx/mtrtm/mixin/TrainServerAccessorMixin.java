@@ -12,4 +12,7 @@ public interface TrainServerAccessorMixin {
 
     @Accessor
     int getManualCoolDown();
+
+    @Accessor
+    void setManualCoolDown(int manualCooldown);
 }

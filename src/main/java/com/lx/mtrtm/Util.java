@@ -40,7 +40,7 @@ public class Util {
                     positions[i] = ((TrainAccessorMixin)train).getTheRoutePosition(((TrainAccessorMixin) train).getReversed() ? train.trainCars - i : i, train.spacing);
                 }
 
-                trainDataList.add(new ExposedTrainData(train, ((TrainServerAccessorMixin)train).getRouteId(), positions, ((TrainAccessorMixin)train).getIsManualAllowed(), ((TrainAccessorMixin)train).getInventory(), ((TrainAccessorMixin)train).getRidingEntities()));
+                trainDataList.add(new ExposedTrainData(train, ((TrainServerAccessorMixin)train).getRouteId(), positions, ((TrainAccessorMixin)train).getIsManualAllowed()));
             }
         }
 

@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -38,11 +39,18 @@ public interface TrainAccessorMixin {
     @Invoker("getRoutePosition")
     Vec3d getTheRoutePosition(int car, int trainSpacing);
 
-    @Mutable
-    @Accessor("isManualAllowed")
-    void setManualAllowed(boolean isManual);
+    @Accessor
+    List<Double> getDistances();
+
+    @Accessor
+    int getNextStoppingIndex();
+
+    @Accessor("railProgress")
+    void setRailProgress(double railProgress);
 
     @Mutable
     @Accessor("isCurrentlyManual")
     void setCurrentlyManual(boolean isCurrentlyManual);
+
+
 }
