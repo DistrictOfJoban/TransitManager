@@ -29,14 +29,14 @@ public class whattrain {
         dispatcher.register(CommandManager.literal("whattrain")
                 .requires(ctx -> ctx.hasPermissionLevel(2))
                         .then(CommandManager.argument("player", EntityArgumentType.player())
-                                .executes(context -> getNearestTrain(context, EntityArgumentType.getPlayer(context, "player").getPos()))
+                                .executes(context -> getNearestTrain(context, EntityArgumentType.getPlayer(context, "player")))
                         )
-                .executes(context -> getNearestTrain(context, context.getSource().getPlayer().getPos())));
+                .executes(context -> getNearestTrain(context, context.getSource().getPlayer())));
     }
 
-    private static int getNearestTrain(CommandContext<ServerCommandSource> context, Vec3d playerPos) {
+    private static int getNearestTrain(CommandContext<ServerCommandSource> context, ServerPlayerEntity player) {
         RailwayData data = RailwayData.getInstance(context.getSource().getWorld());
-        ExposedTrainData trainData = Util.getNearestTrain(context.getSource().getWorld(), playerPos);
+        ExposedTrainData trainData = Util.getNearestTrain(context.getSource().getWorld(), player);
 
         if(trainData == null) {
             context.getSource().sendFeedback(Mappings.literalText("Cannot find any train.").formatted(Formatting.RED), false);

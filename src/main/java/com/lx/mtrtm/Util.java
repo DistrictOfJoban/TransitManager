@@ -25,12 +25,14 @@ import java.util.Map;
 import static mtr.packet.IPacket.PACKET_UPDATE_TRAINS;
 
 public class Util {
-    public static ExposedTrainData getNearestTrain(World world, Vec3d playerPos) {
+    public static ExposedTrainData getNearestTrain(World world, ServerPlayerEntity player) {
+        RailwayData railwayData = RailwayData.getInstance(world);
+        Vec3d playerPos = player.getPos();
         List<ExposedTrainData> trainDataList = new ArrayList<>();
-        RailwayData data = RailwayData.getInstance(world);
+        ExposedTrainData closestTrainCar = null;
 
         /* Loop through each siding */
-        for(Siding siding : data.sidings) {
+        for(Siding siding : railwayData.sidings) {
             /* Loop through each train in each siding */
             for(TrainServer train : ((SidingAccessorMixin)siding).getTrains()) {
                 final Vec3d[] positions = new Vec3d[train.trainCars + 1];
@@ -44,9 +46,14 @@ public class Util {
             }
         }
 
-        ExposedTrainData closestTrainCar = null;
         Vec3d closestPos = null;
         for(ExposedTrainData train : trainDataList) {
+            // Player is riding, so it is most definitely the train player wants
+            if(train.train.isPlayerRiding(player)) {
+                closestTrainCar = train;
+                break;
+            }
+
             /* Loop through every car */
             for(int i = 0; i < train.positions.length; i++) {
                 /* First train found */

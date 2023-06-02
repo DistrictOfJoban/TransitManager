@@ -177,7 +177,7 @@ public class train {
     }
 
     private static ExposedTrainData getNearestTrainOrError(CommandContext<ServerCommandSource> context) throws CommandException {
-        ExposedTrainData trainData = Util.getNearestTrain(context.getSource().getWorld(), context.getSource().getPlayer().getPos());
+        ExposedTrainData trainData = Util.getNearestTrain(context.getSource().getWorld(), context.getSource().getPlayer());
 
         if(trainData == null) {
             throw new CommandException(Mappings.literalText("Cannot find any nearest train!"));
