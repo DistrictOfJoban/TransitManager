@@ -10,6 +10,8 @@ import com.lx.mtrtm.mixin.TrainServerAccessorMixin;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import mtr.data.RailType;
 import mtr.data.RailwayData;
 import mtr.data.Siding;
@@ -91,8 +93,7 @@ public class train {
         context.getSource().sendFeedback(Mappings.literalText("Train ID: " + trainSiding.getTrainId()).formatted(Formatting.GREEN), false);
 
         if(nearestTrain.isManual) {
-            ((TrainAccessorMixin)nearestTrain.train).setCurrentlyManual(false);
-            context.getSource().sendFeedback(Mappings.literalText("NOTE: Train is in manual mode, automatically setting train to ATO.").formatted(Formatting.GREEN), false);
+            context.getSource().sendFeedback(Mappings.literalText("NOTE: Train is currently in manual mode.").formatted(Formatting.YELLOW), false);
         }
         return 1;
     }
@@ -110,12 +111,18 @@ public class train {
             targetDistance = distances.get(0);
         } else {
             int i = 0;
+            IntList validPathIndex = new IntArrayList();
+
             for(PathData path : trainData.train.path) {
                 boolean isStoppablePlatform = path.dwellTime > 0 && path.rail.railType == RailType.PLATFORM;
                 if((isPlatform && isStoppablePlatform) || isPath) {
+                    validPathIndex.add(i);
                     double dist = distances.get(i);
                     if(dist > currentRailProgress) {
-                        if(!next) dist = distances.get(Math.max(0, i - 2));
+                        if(!next) {
+                            boolean last2Path = !isPlatform;
+                            dist = distances.get(validPathIndex.getInt(Math.max(0, validPathIndex.size() - 1 - (last2Path ? 2 : 1))));
+                        }
                         targetDistance = dist;
                         break;
                     }
