@@ -42,6 +42,9 @@ public class train {
                                 .executes(context -> setCollision(context, false))
                         )
                 )
+                .then(CommandManager.literal("board")
+                        .executes(context -> board(context))
+                )
                 .then(CommandManager.literal("ejectAllPassengers")
                         .executes(context -> ejectPassengers(context))
                 )
@@ -148,6 +151,15 @@ public class train {
         ((TrainAccessorMixin)nearestTrain.train).getRidingEntities().clear();
         Util.syncTrainToPlayers(nearestTrain.train, context.getSource().getWorld().getPlayers());
         context.getSource().sendFeedback(Mappings.literalText("All passengers cleared from train!").formatted(Formatting.GREEN), false);
+        return 1;
+    }
+
+    private static int board(CommandContext<ServerCommandSource> context) {
+        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
+
+        ((TrainAccessorMixin)nearestTrain.train).getRidingEntities().add(context.getSource().getPlayer().getUuid());
+        Util.syncTrainToPlayers(nearestTrain.train, context.getSource().getWorld().getPlayers());
+        context.getSource().sendFeedback(Mappings.literalText("Train boarded!").formatted(Formatting.GREEN), false);
         return 1;
     }
 
