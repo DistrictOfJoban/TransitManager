@@ -12,5 +12,6 @@ public class CommandHandler {
         traininv.register(dispatcher);
         mtrpath.register(dispatcher);
         warpstn.register(dispatcher);
+        warpdepot.register(dispatcher);
     }
 }

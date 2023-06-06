@@ -17,6 +17,7 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.List;
@@ -75,17 +76,30 @@ public class whattrain {
             return 1;
         }
 
-        List<Route> currentlyRunningRoute = data.routes.stream().filter(rt -> rt.id == trainData.routeId).toList();
+        List<Route> trainRoutes = data.routes.stream().filter(rt -> rt.id == trainData.routeId).toList();
 
         String currentRouteName = "N/A";
-        if(!currentlyRunningRoute.isEmpty()) {
-            currentRouteName = IGui.formatStationName(currentlyRunningRoute.get(0).name);
+        String currentRouteDestination = null;
+        if(!trainRoutes.isEmpty()) {
+            Route runningRoute = trainRoutes.get(0);
+            currentRouteName = IGui.formatStationName(runningRoute.name);
+
+            long lastPlatformId = runningRoute.getLastPlatformId();
+            Station lastStation = data.dataCache.platformIdToStation.get(lastPlatformId);
+            Platform platform = data.dataCache.platformIdMap.get(lastPlatformId);
+            if(lastStation == null) {
+                BlockPos midPos = platform.getMidPos();
+                currentRouteDestination = "Platform " + platform.name + " (" + midPos.getX() + ", " + midPos.getY() + ", " + midPos.getZ()  + ")";
+            } else {
+                currentRouteDestination = IGui.formatStationName(lastStation.name) + " (" + platform.name + ")";
+            }
         }
 
         final int depotColor = sidingDepot.color;
 
         MutableText depotName = Mappings.literalText(IGui.formatStationName(sidingDepot.name)).styled(style -> style.withColor(depotColor));
         MutableText routeName = Mappings.literalText(currentRouteName).formatted(Formatting.GREEN);
+        MutableText destinationName = currentRouteDestination == null ? null : Mappings.literalText(currentRouteDestination).formatted(Formatting.GREEN);
         MutableText sidingName = Mappings.literalText(IGui.formatStationName(siding.name)).formatted(Formatting.GREEN);
         MutableText trainType = Mappings.literalText(IGui.formatStationName(trainData.train.trainId)).formatted(Formatting.GREEN);
         MutableText trainCars = Mappings.literalText(" (" + trainData.train.trainCars + "-cars)").formatted(Formatting.GREEN);
@@ -112,6 +126,9 @@ public class whattrain {
         context.getSource().sendFeedback(Mappings.literalText("Depots: ").formatted(Formatting.GOLD).append(depotName), false);
         context.getSource().sendFeedback(Mappings.literalText("Siding Number: ").formatted(Formatting.GOLD).append(sidingName), false);
         context.getSource().sendFeedback(Mappings.literalText("Running Route: ").formatted(Formatting.GOLD).append(routeName), false);
+        if(destinationName != null) {
+            context.getSource().sendFeedback(Mappings.literalText("Destination for current route: ").formatted(Formatting.GOLD).append(destinationName), false);
+        }
         context.getSource().sendFeedback(Mappings.literalText("Train Type: ").formatted(Formatting.GOLD).append(trainType).append(trainCars), false);
         context.getSource().sendFeedback(Mappings.literalText("Position: ").formatted(Formatting.GOLD).append(pos), false);
 
