@@ -6,19 +6,18 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import mtr.data.Depot;
 import mtr.data.RailwayData;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.Formatting;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import java.util.List;
 
 public class warpdepot {
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(CommandManager.literal("warpdepot")
-                .requires(source -> source.hasPermissionLevel(2))
-                .then(CommandManager.argument("name", StringArgumentType.greedyString())
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(Commands.literal("warpdepot")
+                .requires(source -> source.hasPermission(2))
+                .then(Commands.argument("name", StringArgumentType.greedyString())
                         .suggests((commandContext, suggestionsBuilder) -> {
-                            RailwayData data = RailwayData.getInstance(commandContext.getSource().getWorld());
+                            RailwayData data = RailwayData.getInstance(commandContext.getSource().getLevel());
                                 String target = suggestionsBuilder.getRemainingLowerCase();
 
                                 List<String> toBeSuggested = Util.formulateMatchingString(target, data.depots.stream().map(e -> e.name).toList());
@@ -30,14 +29,14 @@ public class warpdepot {
                         )
                         .executes(context -> {
                             String name = StringArgumentType.getString(context, "name");
-                            Depot stn = Util.findDepot(name, context.getSource().getWorld());
+                            Depot stn = Util.findDepot(name, context.getSource().getLevel());
                             if(stn == null) {
-                                context.getSource().sendFeedback(Mappings.literalText("Cannot find depot."), false);
+                                context.getSource().sendSuccess(Mappings.literalText("Cannot find depot."), false);
                                 return 1;
                             }
 
-                            context.getSource().getPlayer().requestTeleportAndDismount(getMidPoint(stn.corner1.getLeft(), stn.corner2.getLeft()), context.getSource().getPlayer().getY(), getMidPoint(stn.corner1.getRight(), stn.corner2.getRight()));
-                            context.getSource().sendFeedback(Mappings.literalText("Warped to " + String.join(" ", getStationName(stn.name))).formatted(Formatting.GREEN), false);
+                            context.getSource().getPlayer().dismountTo(getMidPoint(stn.corner1.getA(), stn.corner2.getA()), context.getSource().getPlayer().getY(), getMidPoint(stn.corner1.getB(), stn.corner2.getB()));
+                            context.getSource().sendSuccess(Mappings.literalText("Warped to " + String.join(" ", getStationName(stn.name))).withStyle(ChatFormatting.GREEN), false);
                             return 1;
                         }))
         );

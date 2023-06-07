@@ -7,7 +7,7 @@ import it.unimi.dsi.fastutil.longs.LongList;
 import mtr.data.RailwayData;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,7 +29,7 @@ public class TransitManager implements ModInitializer {
 
         /* Abort MTR Path Generation Thread on Server Shutdown */
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            for(World world : server.getWorlds()) {
+            for(Level world : server.getAllLevels()) {
                 RailwayData data = RailwayData.getInstance(world);
                 if(data != null) {
                     depotPathToBeInterrupted.addAll(((RailwayDataPathGenerationModuleAccessorMixin)data.railwayDataPathGenerationModule).getGeneratingPathThreads().keySet());

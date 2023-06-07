@@ -17,63 +17,59 @@ import mtr.data.RailwayData;
 import mtr.data.Siding;
 import mtr.data.TrainServer;
 import mtr.path.PathData;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.Vec3d;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandRuntimeException;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 public class train {
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(CommandManager.literal("train")
-                .requires(ctx -> ctx.hasPermissionLevel(2))
-                .then(CommandManager.literal("collision")
-                        .then(CommandManager.literal("disable")
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(Commands.literal("train")
+                .requires(ctx -> ctx.hasPermission(2))
+                .then(Commands.literal("collision")
+                        .then(Commands.literal("disable")
                                 .executes(context -> setCollision(context, true))
                         )
-                        .then(CommandManager.literal("enable")
+                        .then(Commands.literal("enable")
                                 .executes(context -> setCollision(context, false))
                         )
                 )
-                .then(CommandManager.literal("board")
+                .then(Commands.literal("board")
                         .executes(context -> board(context))
                 )
-                .then(CommandManager.literal("ejectAllPassengers")
+                .then(Commands.literal("ejectAllPassengers")
                         .executes(context -> ejectPassengers(context))
                 )
-                .then(CommandManager.literal("clear")
+                .then(Commands.literal("clear")
                         .executes(context -> clearNearestTrain(context))
                 )
-                .then(CommandManager.literal("deploy")
+                .then(Commands.literal("deploy")
                         .executes(context -> deploy(context))
                 )
-                .then(CommandManager.literal("jump")
-                        .then(CommandManager.literal("siding")
+                .then(Commands.literal("jump")
+                        .then(Commands.literal("siding")
                                 .executes(context -> jump(context, true, false, false, false, true))
                         )
-                        .then(CommandManager.literal("next")
-                                .then(CommandManager.literal("platform")
+                        .then(Commands.literal("next")
+                                .then(Commands.literal("platform")
                                         .executes(context -> jump(context, true, false, true, false, false))
                                 )
-                                .then(CommandManager.literal("path")
+                                .then(Commands.literal("path")
                                         .executes(context -> jump(context, true, true, false, false, false))
                                 )
-                                .then(CommandManager.literal("stopPosition")
+                                .then(Commands.literal("stopPosition")
                                         .executes(context -> jump(context, true, false, false, true, false))
                                 )
                         )
-                        .then(CommandManager.literal("previous")
-                                .then(CommandManager.literal("platform")
+                        .then(Commands.literal("previous")
+                                .then(Commands.literal("platform")
                                         .executes(context -> jump(context, false, false, true, false, false))
                                 )
-                                .then(CommandManager.literal("path")
+                                .then(Commands.literal("path")
                                         .executes(context -> jump(context, false, true, false, false, false))
                                 )
                         )
@@ -81,8 +77,8 @@ public class train {
         );
     }
 
-    private static int deploy(CommandContext<ServerCommandSource> context) {
-        RailwayData data = RailwayData.getInstance(context.getSource().getWorld());
+    private static int deploy(CommandContext<CommandSourceStack> context) {
+        RailwayData data = RailwayData.getInstance(context.getSource().getLevel());
         ExposedTrainData nearestTrain = getNearestTrainOrError(context);
 
         List<Siding> trainSidings = data.sidings.stream().filter(siding -> siding.id == nearestTrain.train.sidingId).toList();
@@ -92,16 +88,16 @@ public class train {
         }
 
         nearestTrain.train.deployTrain();
-        context.getSource().sendFeedback(Mappings.literalText("Deploying the nearest train (Siding " + trainSiding.name + ")...").formatted(Formatting.GREEN), false);
-        context.getSource().sendFeedback(Mappings.literalText("Train ID: " + trainSiding.getTrainId()).formatted(Formatting.GREEN), false);
+        context.getSource().sendSuccess(Mappings.literalText("Deploying the nearest train (Siding " + trainSiding.name + ")...").withStyle(ChatFormatting.GREEN), false);
+        context.getSource().sendSuccess(Mappings.literalText("Train ID: " + trainSiding.getTrainId()).withStyle(ChatFormatting.GREEN), false);
 
         if(nearestTrain.isManual) {
-            context.getSource().sendFeedback(Mappings.literalText("NOTE: Train is currently in manual mode.").formatted(Formatting.YELLOW), false);
+            context.getSource().sendSuccess(Mappings.literalText("NOTE: Train is currently in manual mode.").withStyle(ChatFormatting.YELLOW), false);
         }
         return 1;
     }
 
-    private static int jump(CommandContext<ServerCommandSource> context, boolean next, boolean isPath, boolean isPlatform, boolean isNextStop, boolean isSiding) {
+    private static int jump(CommandContext<CommandSourceStack> context, boolean next, boolean isPath, boolean isPlatform, boolean isNextStop, boolean isSiding) {
         ExposedTrainData trainData = getNearestTrainOrError(context);
         double currentRailProgress = trainData.train.getRailProgress();
         List<Double> distances = ((TrainAccessorMixin)trainData.train).getDistances();
@@ -136,46 +132,46 @@ public class train {
 
         if(targetDistance != -1) {
             ((TrainAccessorMixin)trainData.train).setRailProgress(targetDistance);
-            Util.syncTrainToPlayers(trainData.train, context.getSource().getWorld().getPlayers());
+            Util.syncTrainToPlayers(trainData.train, context.getSource().getLevel().players());
 
-            context.getSource().sendFeedback(Mappings.literalText("Jumped to distance " + Math.round(targetDistance) + "m.").formatted(Formatting.GREEN), false);
+            context.getSource().sendSuccess(Mappings.literalText("Jumped to distance " + Math.round(targetDistance) + "m.").withStyle(ChatFormatting.GREEN), false);
         } else {
-            throw new CommandException(Mappings.literalText("Cannot find the next path to stop to."));
+            throw new CommandRuntimeException(Mappings.literalText("Cannot find the next path to stop to."));
         }
         return 1;
     }
 
-    private static int ejectPassengers(CommandContext<ServerCommandSource> context) {
+    private static int ejectPassengers(CommandContext<CommandSourceStack> context) {
         ExposedTrainData nearestTrain = getNearestTrainOrError(context);
 
         ((TrainAccessorMixin)nearestTrain.train).getRidingEntities().clear();
-        Util.syncTrainToPlayers(nearestTrain.train, context.getSource().getWorld().getPlayers());
-        context.getSource().sendFeedback(Mappings.literalText("All passengers cleared from train!").formatted(Formatting.GREEN), false);
+        Util.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
+        context.getSource().sendSuccess(Mappings.literalText("All passengers cleared from train!").withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
-    private static int board(CommandContext<ServerCommandSource> context) {
+    private static int board(CommandContext<CommandSourceStack> context) {
         ExposedTrainData nearestTrain = getNearestTrainOrError(context);
 
-        ((TrainAccessorMixin)nearestTrain.train).getRidingEntities().add(context.getSource().getPlayer().getUuid());
-        Util.syncTrainToPlayers(nearestTrain.train, context.getSource().getWorld().getPlayers());
-        context.getSource().sendFeedback(Mappings.literalText("Train boarded!").formatted(Formatting.GREEN), false);
+        ((TrainAccessorMixin)nearestTrain.train).getRidingEntities().add(context.getSource().getPlayer().getUUID());
+        Util.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
+        context.getSource().sendSuccess(Mappings.literalText("Train boarded!").withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
-    private static int clearNearestTrain(CommandContext<ServerCommandSource> context) {
+    private static int clearNearestTrain(CommandContext<CommandSourceStack> context) {
         ExposedTrainData nearestTrain = getNearestTrainOrError(context);
-        RailwayData railwayData = RailwayData.getInstance(context.getSource().getWorld());
+        RailwayData railwayData = RailwayData.getInstance(context.getSource().getLevel());
 
         long sidingId = nearestTrain.train.sidingId;
         Siding trainSiding = railwayData.dataCache.sidingIdMap.get(sidingId);
         trainSiding.clearTrains();
 
-        context.getSource().sendFeedback(Mappings.literalText("Siding cleared!").formatted(Formatting.GREEN), false);
+        context.getSource().sendSuccess(Mappings.literalText("Siding cleared!").withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
-    private static int setCollision(CommandContext<ServerCommandSource> context, boolean disable) {
+    private static int setCollision(CommandContext<CommandSourceStack> context, boolean disable) {
         ExposedTrainData nearestTrain = getNearestTrainOrError(context);
 
         if(!disable) {
@@ -184,15 +180,15 @@ public class train {
             TransitManager.disableTrainCollision.add(nearestTrain.train.sidingId);
         }
 
-        context.getSource().sendFeedback(Mappings.literalText("Collision detection for the nearest train is now " + (disable ? "disabled" : "enabled")).formatted(Formatting.GREEN), false);
+        context.getSource().sendSuccess(Mappings.literalText("Collision detection for the nearest train is now " + (disable ? "disabled" : "enabled")).withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
-    private static ExposedTrainData getNearestTrainOrError(CommandContext<ServerCommandSource> context) throws CommandException {
-        ExposedTrainData trainData = Util.getNearestTrain(context.getSource().getWorld(), context.getSource().getPlayer());
+    private static ExposedTrainData getNearestTrainOrError(CommandContext<CommandSourceStack> context) throws CommandRuntimeException {
+        ExposedTrainData trainData = Util.getNearestTrain(context.getSource().getLevel(), context.getSource().getPlayer());
 
         if(trainData == null) {
-            throw new CommandException(Mappings.literalText("Cannot find any nearest train!"));
+            throw new CommandRuntimeException(Mappings.literalText("Cannot find any nearest train!"));
         }
         return trainData;
     }

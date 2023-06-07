@@ -10,9 +10,6 @@ targetCompatibility = JavaVersion.VERSION_16
 
 group = project.maven_group
 
-/* Note: 1.19.4 doesn't work because Mojang added an "renderButton" method, which conflicts with MTR's WidgetShorterSlider renderButton method,
-* but because they are using mojmap it's not called renderButton and nothing bad happens on their side.
-* Don't know anything about mappings and stuff, though I'd rather stick with yarn for now really. */
 def default_minecraft_version = "1.19.2"
 def minecraft_version = project.properties.containsKey("buildVersion") ? project.getProperties().get("buildVersion") : default_minecraft_version
 def minecraft_major_version = minecraft_version.split("\\.")[0] as int // Always return 1, unless mojang goes haywire :P
@@ -22,7 +19,6 @@ def minecraft_version_str = (minecraft_major_version as String) + (minecraft_mai
 def use_absolute_version = (minecraft_version_str as int) >= 11903
 def mc_requirement = use_absolute_version ? default_minecraft_version : "${minecraft_major_version}.${minecraft_main_version}.x"
 
-def yarn_mappings = new JsonSlurper().parse(("https://meta.fabricmc.net/v2/versions/yarn/" + minecraft_version).toURL())[0]["version"]
 def loader_version = project.loader_version
 def fapi_version = getModrinthVersion("fabric", minecraft_version, "fabric-api")
 
@@ -86,7 +82,8 @@ dependencies {
 	// To change the versions see the gradle.properties file
 	annotationProcessor "systems.manifold:manifold-preprocessor:${project.manifold_version}"
 	minecraft "com.mojang:minecraft:${minecraft_version}"
-	mappings "net.fabricmc:yarn:${yarn_mappings}:v2"
+	/* We're using mojmap instead of yarn because of method name conflict in MTR Mod on >= 1.19.4 */
+	mappings loom.officialMojangMappings()
 	modImplementation "net.fabricmc:fabric-loader:${loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.

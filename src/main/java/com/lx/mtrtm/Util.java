@@ -7,16 +7,15 @@ import com.lx.mtrtm.mixin.TrainServerAccessorMixin;
 import mtr.data.*;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,9 +24,9 @@ import java.util.Map;
 import static mtr.packet.IPacket.PACKET_UPDATE_TRAINS;
 
 public class Util {
-    public static ExposedTrainData getNearestTrain(World world, ServerPlayerEntity player) {
+    public static ExposedTrainData getNearestTrain(Level world, ServerPlayer player) {
         RailwayData railwayData = RailwayData.getInstance(world);
-        Vec3d playerPos = player.getPos();
+        Vec3 playerPos = player.position();
         List<ExposedTrainData> trainDataList = new ArrayList<>();
         ExposedTrainData closestTrainCar = null;
 
@@ -35,7 +34,7 @@ public class Util {
         for(Siding siding : railwayData.sidings) {
             /* Loop through each train in each siding */
             for(TrainServer train : ((SidingAccessorMixin)siding).getTrains()) {
-                final Vec3d[] positions = new Vec3d[train.trainCars + 1];
+                final Vec3[] positions = new Vec3[train.trainCars + 1];
 
                 /* Loop through each car in each train */
                 for (int i = 0; i <= train.trainCars; i++) {
@@ -46,7 +45,7 @@ public class Util {
             }
         }
 
-        Vec3d closestPos = null;
+        Vec3 closestPos = null;
         for(ExposedTrainData train : trainDataList) {
             // Player is riding, so it is most definitely the train player wants
             if(train.train.isPlayerRiding(player)) {
@@ -92,8 +91,8 @@ public class Util {
         return trainData;
     }
 
-    public static double getManhattenDistance(Vec3d pos1, Vec3d pos2) {
-        return Math.abs(pos2.getX() - pos1.getX()) + Math.abs(pos2.getY() - pos1.getY()) + Math.abs(pos2.getZ() - pos1.getZ());
+    public static double getManhattenDistance(Vec3 pos1, Vec3 pos2) {
+        return Math.abs(pos2.x() - pos1.x()) + Math.abs(pos2.y() - pos1.y()) + Math.abs(pos2.z() - pos1.z());
     }
 
     public static double getManhattenDistance(BlockPos pos1, BlockPos pos2) {
@@ -113,7 +112,7 @@ public class Util {
         return splitted.length > 1 ? splitted[1] : "";
     }
 
-    public static Depot findDepot(String targetDepot, World world) {
+    public static Depot findDepot(String targetDepot, Level world) {
         String trimmedTargetDepot = targetDepot.trim();
         RailwayData data = RailwayData.getInstance(world);
         if(data == null) return null;
@@ -142,7 +141,7 @@ public class Util {
         return newList;
     }
 
-    public static Station findStation(String targetStn, World world) {
+    public static Station findStation(String targetStn, Level world) {
         RailwayData data = RailwayData.getInstance(world);
         if(data == null) return null;
 
@@ -160,22 +159,22 @@ public class Util {
         return null;
     }
 
-    public static void syncTrainToPlayers(TrainServer trainServer, List<ServerPlayerEntity> players) {
-        PacketByteBuf trainPacket = PacketByteBufs.create();
+    public static void syncTrainToPlayers(TrainServer trainServer, List<ServerPlayer> players) {
+        FriendlyByteBuf trainPacket = PacketByteBufs.create();
         trainServer.writePacket(trainPacket);
 
-        PacketByteBuf packet = PacketByteBufs.create();
+        FriendlyByteBuf packet = PacketByteBufs.create();
         packet.writeBytes(trainPacket);
 
-        for(ServerPlayerEntity player : players) {
+        for(ServerPlayer player : players) {
             ServerPlayNetworking.send(player, PACKET_UPDATE_TRAINS, packet);
         }
     }
 
-    public static Pair<MutableText, MutableText> getInterchangeRouteNames(Station station, Route thisRoute, RailwayData data, Formatting forceColor) {
-        MutableText chinTexts = Mappings.literalText("");
-        MutableText engTexts = Mappings.literalText("");
-        MutableText comma = Mappings.literalText(", ");
+    public static Tuple<MutableComponent, MutableComponent> getInterchangeRouteNames(Station station, Route thisRoute, RailwayData data, ChatFormatting forceColor) {
+        MutableComponent chinTexts = Mappings.literalText("");
+        MutableComponent engTexts = Mappings.literalText("");
+        MutableComponent comma = Mappings.literalText(", ");
         final HashMap<String, Route> routeInStn = new HashMap<>();
         for(Route rt : data.routes) {
             if(!rt.isHidden && !getRouteName(rt.name).equals(getRouteName(thisRoute.name)) && !rt.name.startsWith("[WIP]") && rt.routeType != RouteType.HIGH_SPEED) {
@@ -191,8 +190,8 @@ public class Util {
 
         boolean first = true;
         for(Route route : routeInStn.values()) {
-            MutableText chinText = Mappings.literalText(getRouteName(getChin(route.name)));
-            MutableText engText = Mappings.literalText(getRouteName(getEng(route.name)));
+            MutableComponent chinText = Mappings.literalText(getRouteName(getChin(route.name)));
+            MutableComponent engText = Mappings.literalText(getRouteName(getEng(route.name)));
             if(forceColor == null) {
                 chinText.setStyle(Style.EMPTY.withColor(route.color));
                 engText.setStyle(Style.EMPTY.withColor(route.color));
@@ -209,6 +208,6 @@ public class Util {
             }
             first = false;
         }
-        return new Pair<>(chinTexts, engTexts);
+        return new Tuple<>(chinTexts, engTexts);
     }
 }
