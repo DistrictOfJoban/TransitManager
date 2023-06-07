@@ -8,7 +8,7 @@ import com.lx.mtrtm.mixin.TrainServerAccessorMixin;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import mtr.data.*;
-import mtr.path.PathData;
+import net.minecraft.SharedConstants;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -18,7 +18,6 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.List;
 import java.util.Set;
@@ -77,11 +76,24 @@ public class whattrain {
         }
 
         List<Route> trainRoutes = data.routes.stream().filter(rt -> rt.id == trainData.routeId).toList();
-
+        BlockPos sidingMidPos = siding.getMidPos();
         String currentRouteName = "N/A";
+        final int currentRouteColor;
         String currentRouteDestination = null;
+        String dwellString;
+
+        double remainingDwell = (trainData.train.getTotalDwellTicks() - trainData.train.getElapsedDwellTicks()) / SharedConstants.TICKS_PER_SECOND;
+        int displayedDwell = (int)Math.round(remainingDwell);
+        if(remainingDwell < 0) {
+            dwellString = "0s (" + Math.abs(displayedDwell) + "s overdue)";
+        } else {
+            dwellString = displayedDwell + "s";
+        }
+
+
         if(!trainRoutes.isEmpty()) {
             Route runningRoute = trainRoutes.get(0);
+            currentRouteColor = runningRoute.color;
             currentRouteName = IGui.formatStationName(runningRoute.name);
 
             long lastPlatformId = runningRoute.getLastPlatformId();
@@ -93,18 +105,19 @@ public class whattrain {
             } else {
                 currentRouteDestination = IGui.formatStationName(lastStation.name) + " (" + platform.name + ")";
             }
+        } else {
+            currentRouteColor = 0;
         }
 
         final int depotColor = sidingDepot.color;
+        final String depotSidingName = IGui.formatStationName(sidingDepot.name)  + " (Siding " + siding.name + ")";
 
-        MutableText depotName = Mappings.literalText(IGui.formatStationName(sidingDepot.name)).styled(style -> style.withColor(depotColor));
-        MutableText routeName = Mappings.literalText(currentRouteName).formatted(Formatting.GREEN);
+        MutableText depotName = Mappings.literalText(depotSidingName).styled(style -> style.withColor(depotColor));
+        MutableText routeName = Mappings.literalText(currentRouteName).styled(style -> style.withColor(currentRouteColor));
         MutableText destinationName = currentRouteDestination == null ? null : Mappings.literalText(currentRouteDestination).formatted(Formatting.GREEN);
-        MutableText sidingName = Mappings.literalText(IGui.formatStationName(siding.name)).formatted(Formatting.GREEN);
-        MutableText trainType = Mappings.literalText(IGui.formatStationName(trainData.train.trainId)).formatted(Formatting.GREEN);
-        MutableText trainCars = Mappings.literalText(" (" + trainData.train.trainCars + "-cars)").formatted(Formatting.GREEN);
+        String title = IGui.formatStationName(trainData.train.trainId) + " (" + trainData.train.trainCars + "-cars)";
         MutableText pos = Mappings.literalText(String.format("%d, %d, %d", Math.round(trainData.positions[0].getX()), Math.round(trainData.positions[0].getY()), Math.round(trainData.positions[0].getZ()))).formatted(Formatting.GREEN);
-
+        MutableText dwell = Mappings.literalText(dwellString).formatted(Formatting.GREEN);
         MutableText isManual = Mappings.literalText(trainData.isManual ? trainData.isCurrentlyManual ? "Manual (Currently Manual)" : "Manual (Current ATO)" : "ATO").formatted(Formatting.GREEN);
 
         MutableText trainNotch = Mappings.literalText(trainData.accelerationSign == -2 ? "B2" : trainData.accelerationSign == -1 ? "B1" : trainData.accelerationSign == 0 ? "N" : trainData.accelerationSign == 1 ? "P1" : "P2").formatted(Formatting.GREEN);
@@ -121,19 +134,20 @@ public class whattrain {
 
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Mappings.literalText(ridingEntitiesStr.toString()).formatted(Formatting.GREEN));
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/traininv " + siding.id);
-        context.getSource().sendFeedback(Mappings.literalText("===== Nearest Train =====").formatted(Formatting.GREEN), false);
-        context.getSource().sendFeedback(Mappings.literalText("Mode: ").formatted(Formatting.GOLD).append(isManual), false);
-        context.getSource().sendFeedback(Mappings.literalText("Depots: ").formatted(Formatting.GOLD).append(depotName), false);
-        context.getSource().sendFeedback(Mappings.literalText("Siding Number: ").formatted(Formatting.GOLD).append(sidingName), false);
-        context.getSource().sendFeedback(Mappings.literalText("Running Route: ").formatted(Formatting.GOLD).append(routeName), false);
-        if(destinationName != null) {
-            context.getSource().sendFeedback(Mappings.literalText("Destination for current route: ").formatted(Formatting.GOLD).append(destinationName), false);
-        }
-        context.getSource().sendFeedback(Mappings.literalText("Train Type: ").formatted(Formatting.GOLD).append(trainType).append(trainCars), false);
-        context.getSource().sendFeedback(Mappings.literalText("Position: ").formatted(Formatting.GOLD).append(pos), false);
+        HoverEvent hoverEventTpToSiding = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Mappings.literalText("Teleport to siding").formatted(Formatting.GREEN));
+        ClickEvent clickEventTpToSiding = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + sidingMidPos.getX() + " " + sidingMidPos.getY() + " " + sidingMidPos.getZ());
 
-        if(ridingEntities.size() > 0) {
-            context.getSource().sendFeedback(Mappings.literalText("Riding players: (Hover Here)").formatted(Formatting.GOLD).styled(style -> style.withHoverEvent(hoverEvent)), false);
+        context.getSource().sendFeedback(Mappings.literalText("===== " + title + " =====").formatted(Formatting.GREEN), false);
+        sendKeyValueFeedback(context, Mappings.literalText("Mode: "), isManual);
+        sendKeyValueFeedback(context, Mappings.literalText("Depot/Siding: "), depotName.styled(style -> style.withHoverEvent(hoverEventTpToSiding).withClickEvent(clickEventTpToSiding)));
+        sendKeyValueFeedback(context, Mappings.literalText("Position: "), pos);
+        sendKeyValueFeedback(context, Mappings.literalText("Running Route: "), routeName);
+        if(trainData.train.getSpeed() == 0 && trainData.train.getTotalDwellTicks() > 0) {
+            sendKeyValueFeedback(context, Mappings.literalText("Dwell left: "), dwell);
+        }
+
+        if(destinationName != null) {
+            sendKeyValueFeedback(context, Mappings.literalText("Destination: "), destinationName);
         }
 
         if(!((TrainAccessorMixin)trainData.train).getInventory().isEmpty()) {
@@ -141,9 +155,17 @@ public class whattrain {
         }
 
         if(trainData.isManual && trainData.isCurrentlyManual) {
-            context.getSource().sendFeedback(Mappings.literalText("Train Notch: ").formatted(Formatting.GOLD).append(trainNotch), false);
-            context.getSource().sendFeedback(Mappings.literalText("Switching to ATO in: ").formatted(Formatting.GOLD).append(PMLeft), false);
+            sendKeyValueFeedback(context, Mappings.literalText("Train Notch: "), trainNotch);
+            sendKeyValueFeedback(context, Mappings.literalText("Switching to ATO in: "), PMLeft);
+        }
+
+        if(ridingEntities.size() > 0) {
+            context.getSource().sendFeedback(Mappings.literalText("Riding players: (Hover Here)").formatted(Formatting.GOLD).styled(style -> style.withHoverEvent(hoverEvent)), false);
         }
         return 1;
+    }
+
+    private static void sendKeyValueFeedback(CommandContext<ServerCommandSource> context, MutableText key, MutableText value) {
+        context.getSource().sendFeedback(key.formatted(Formatting.GOLD).append(value), false);
     }
 }
