@@ -45,6 +45,9 @@ public interface TrainAccessorMixin {
     @Accessor
     int getNextStoppingIndex();
 
+    @Accessor("elapsedDwellTicks")
+    void setElapsedDwellTicks(float dwellTicks);
+
     @Accessor("railProgress")
     void setRailProgress(double railProgress);
 

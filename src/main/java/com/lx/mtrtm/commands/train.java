@@ -52,6 +52,9 @@ public class train {
                 .then(Commands.literal("deploy")
                         .executes(context -> deploy(context))
                 )
+                .then(Commands.literal("skipDwell")
+                        .executes(context -> skipDwell(context))
+                )
                 .then(Commands.literal("jump")
                         .then(Commands.literal("siding")
                                 .executes(context -> jump(context, true, false, false, false, true))
@@ -171,6 +174,15 @@ public class train {
         trainSiding.clearTrains();
 
         context.getSource().sendSuccess(Mappings.literalText("Siding cleared!").withStyle(ChatFormatting.GREEN), false);
+        return 1;
+    }
+
+    private static int skipDwell(CommandContext<CommandSourceStack> context) {
+        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
+        ((TrainAccessorMixin)nearestTrain.train).setElapsedDwellTicks(nearestTrain.train.getTotalDwellTicks());
+        Util.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
+
+        context.getSource().sendSuccess(Mappings.literalText("Dwell time skipped!").withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
