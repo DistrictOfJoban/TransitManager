@@ -24,9 +24,8 @@ import java.util.Map;
 import static mtr.packet.IPacket.PACKET_UPDATE_TRAINS;
 
 public class Util {
-    public static ExposedTrainData getNearestTrain(Level world, ServerPlayer player) {
+    public static ExposedTrainData getNearestTrain(Level world, ServerPlayer player, Vec3 playerPos) {
         RailwayData railwayData = RailwayData.getInstance(world);
-        Vec3 playerPos = player.position();
         List<ExposedTrainData> trainDataList = new ArrayList<>();
         ExposedTrainData closestTrainCar = null;
 
@@ -48,7 +47,7 @@ public class Util {
         Vec3 closestPos = null;
         for(ExposedTrainData train : trainDataList) {
             // Player is riding, so it is most definitely the train player wants
-            if(train.train.isPlayerRiding(player)) {
+            if(player != null && train.train.isPlayerRiding(player)) {
                 closestTrainCar = train;
                 break;
             }

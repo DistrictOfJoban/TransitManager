@@ -21,6 +21,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.server.level.ServerPlayer;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -186,7 +188,13 @@ public class train {
     }
 
     private static ExposedTrainData getNearestTrainOrError(CommandContext<CommandSourceStack> context) throws CommandRuntimeException {
-        ExposedTrainData trainData = Util.getNearestTrain(context.getSource().getLevel(), context.getSource().getPlayer());
+        ServerPlayer player = context.getSource().getPlayer();
+        ExposedTrainData trainData;
+        if (player != null) {
+            trainData = Util.getNearestTrain(context.getSource().getLevel(), context.getSource().getPlayer(), context.getSource().getPlayer().getEyePosition());
+        } else {
+            trainData = Util.getNearestTrain(context.getSource().getLevel(), null, context.getSource().getPosition());
+        }
 
         if(trainData == null) {
             throw new CommandRuntimeException(Mappings.literalText("Cannot find any nearest train!"));

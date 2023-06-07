@@ -35,7 +35,7 @@ public class whattrain {
 
     public static int getNearestTrain(CommandContext<CommandSourceStack> context, ServerPlayer player) {
         RailwayData data = RailwayData.getInstance(context.getSource().getLevel());
-        ExposedTrainData trainData = Util.getNearestTrain(context.getSource().getLevel(), player);
+        ExposedTrainData trainData = Util.getNearestTrain(context.getSource().getLevel(), player, player.getEyePosition());
 
         if(trainData == null) {
             context.getSource().sendSuccess(Mappings.literalText("Cannot find any train.").withStyle(ChatFormatting.RED), false);
