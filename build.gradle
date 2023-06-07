@@ -48,6 +48,7 @@ task setupLibrary() {
 			dest "lib/mtr-fabric.jar"
 			overwrite true
 		}
+        println("MTR Downloaded, you may need to refresh gradle for changes to take effect.")
 	}
 }
 

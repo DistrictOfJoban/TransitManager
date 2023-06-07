@@ -74,6 +74,7 @@ public class train {
                                 )
                         )
                 )
+                .executes(context -> whattrain.getNearestTrain(context, context.getSource().getPlayer()))
         );
     }
 

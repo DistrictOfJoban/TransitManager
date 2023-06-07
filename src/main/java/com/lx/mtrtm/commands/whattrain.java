@@ -33,7 +33,7 @@ public class whattrain {
                 .executes(context -> getNearestTrain(context, context.getSource().getPlayer())));
     }
 
-    private static int getNearestTrain(CommandContext<CommandSourceStack> context, ServerPlayer player) {
+    public static int getNearestTrain(CommandContext<CommandSourceStack> context, ServerPlayer player) {
         RailwayData data = RailwayData.getInstance(context.getSource().getLevel());
         ExposedTrainData trainData = Util.getNearestTrain(context.getSource().getLevel(), player);
 
@@ -75,7 +75,6 @@ public class whattrain {
         }
 
         List<Route> trainRoutes = data.routes.stream().filter(rt -> rt.id == trainData.routeId).toList();
-        BlockPos sidingMidPos = siding.getMidPos();
         String currentRouteName = "N/A";
         final int currentRouteColor;
         String currentRouteDestination = null;
@@ -89,6 +88,7 @@ public class whattrain {
             dwellString = displayedDwell + "s";
         }
 
+        Platform lastPlatformInRoute = null;
 
         if(!trainRoutes.isEmpty()) {
             Route runningRoute = trainRoutes.get(0);
@@ -97,12 +97,12 @@ public class whattrain {
 
             long lastPlatformId = runningRoute.getLastPlatformId();
             Station lastStation = data.dataCache.platformIdToStation.get(lastPlatformId);
-            Platform platform = data.dataCache.platformIdMap.get(lastPlatformId);
+            lastPlatformInRoute = data.dataCache.platformIdMap.get(lastPlatformId);
             if(lastStation == null) {
-                BlockPos midPos = platform.getMidPos();
-                currentRouteDestination = "Platform " + platform.name + " (" + midPos.getX() + ", " + midPos.getY() + ", " + midPos.getZ()  + ")";
+                BlockPos midPos = lastPlatformInRoute.getMidPos();
+                currentRouteDestination = "Platform " + lastPlatformInRoute.name + " (" + midPos.getX() + ", " + midPos.getY() + ", " + midPos.getZ()  + ")";
             } else {
-                currentRouteDestination = IGui.formatStationName(lastStation.name) + " (" + platform.name + ")";
+                currentRouteDestination = IGui.formatStationName(lastStation.name) + " (" + lastPlatformInRoute.name + ")";
             }
         } else {
             currentRouteColor = 0;
@@ -133,12 +133,10 @@ public class whattrain {
 
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Mappings.literalText(ridingEntitiesStr.toString()).withStyle(ChatFormatting.GREEN));
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/traininv " + siding.id);
-        HoverEvent hoverEventTpToSiding = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Mappings.literalText("Teleport to siding").withStyle(ChatFormatting.GREEN));
-        ClickEvent clickEventTpToSiding = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + sidingMidPos.getX() + " " + sidingMidPos.getY() + " " + sidingMidPos.getZ());
 
         context.getSource().sendSuccess(Mappings.literalText("===== " + title + " =====").withStyle(ChatFormatting.GREEN), false);
         sendKeyValueFeedback(context, Mappings.literalText("Mode: "), isManual);
-        sendKeyValueFeedback(context, Mappings.literalText("Depot/Siding: "), depotName.withStyle(style -> style.withHoverEvent(hoverEventTpToSiding).withClickEvent(clickEventTpToSiding)));
+        sendKeyValueFeedback(context, Mappings.literalText("Depot/Siding: "), teleportToSavedRailText(depotName, siding));
         sendKeyValueFeedback(context, Mappings.literalText("Position: "), pos);
         sendKeyValueFeedback(context, Mappings.literalText("Running Route: "), routeName);
         if(trainData.train.getSpeed() == 0 && trainData.train.getTotalDwellTicks() > 0) {
@@ -146,7 +144,7 @@ public class whattrain {
         }
 
         if(destinationName != null) {
-            sendKeyValueFeedback(context, Mappings.literalText("Destination: "), destinationName);
+            sendKeyValueFeedback(context, Mappings.literalText("Destination: "), teleportToSavedRailText(destinationName, lastPlatformInRoute));
         }
 
         if(!((TrainAccessorMixin)trainData.train).getInventory().isEmpty()) {
@@ -166,5 +164,13 @@ public class whattrain {
 
     private static void sendKeyValueFeedback(CommandContext<CommandSourceStack> context, MutableComponent key, MutableComponent value) {
         context.getSource().sendSuccess(key.withStyle(ChatFormatting.GOLD).append(value), false);
+    }
+
+    private static MutableComponent teleportToSavedRailText(MutableComponent originalText, SavedRailBase savedRail) {
+        if(savedRail == null) return originalText;
+        BlockPos midPos = savedRail.getMidPos();
+        HoverEvent hoverEventTp = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Mappings.literalText("Click to teleport").withStyle(ChatFormatting.GREEN));
+        ClickEvent clickEventTp = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + midPos.getX() + " " + midPos.getY() + " " + midPos.getZ());
+        return originalText.withStyle(ChatFormatting.UNDERLINE).withStyle(e -> e.withHoverEvent(hoverEventTp).withClickEvent(clickEventTp));
     }
 }
