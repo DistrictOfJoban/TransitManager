@@ -31,7 +31,9 @@ public class whatplatform {
                     ArrayList<String> routeList = new ArrayList<>();
                     for (Route route : data.routes) {
                         if (route.platformIds.stream().anyMatch(e -> e.platformId == platformId)) {
-                            routeList.add(route.name.replace("|", " "));
+                            String routeStr = route.name.replace("|", " ");
+                            if(route.isHidden) routeStr += " (Hidden)";
+                            routeList.add(routeStr);
                         }
                     }
 
