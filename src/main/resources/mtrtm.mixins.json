@@ -4,6 +4,7 @@
   "package": "com.lx.mtrtm.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "BlockPSDTopMixin",
     "PacketTrainDataGuiServerMixin",
     "RailwayDataPathGenerationModuleAccessorMixin",
     "RailwayDataPathGenerationModuleMixin",
