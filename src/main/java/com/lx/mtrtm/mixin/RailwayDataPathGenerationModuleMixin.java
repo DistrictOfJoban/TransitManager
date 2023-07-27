@@ -21,12 +21,16 @@ public class RailwayDataPathGenerationModuleMixin {
     public void generatePath(MinecraftServer minecraftServer, long depotId, CallbackInfo ci) {
         /* Abort path generation if requested */
         if(TransitManager.depotPathToBeInterrupted.contains(depotId)) {
-            TransitManager.depotPathToBeInterrupted.remove(depotId);
-            if(Config.forceKillMTRPathThread) {
-                generatingPathThreads.get(depotId).stop();
-            } else {
-                generatingPathThreads.get(depotId).interrupt();
+            Thread thread = generatingPathThreads.get(depotId);
+            if(thread != null) {
+                if(Config.forceKillMTRPathThread) {
+                    thread.stop();
+                } else {
+                    thread.interrupt();
+                }
             }
+
+            TransitManager.depotPathToBeInterrupted.remove(depotId);
             generatingPathThreads.remove(depotId);
             ci.cancel();
             return;
@@ -35,7 +39,10 @@ public class RailwayDataPathGenerationModuleMixin {
         if(Config.forceKillMTRPathThread) {
             /* Force kill thread before regenerating path */
             if(generatingPathThreads.containsKey(depotId)) {
-                generatingPathThreads.get(depotId).stop();
+                Thread thread = generatingPathThreads.get(depotId);
+                if(thread != null) {
+                    thread.stop();
+                }
                 generatingPathThreads.remove(depotId);
             }
         }

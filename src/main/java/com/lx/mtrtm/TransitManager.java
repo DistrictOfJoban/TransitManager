@@ -26,19 +26,5 @@ public class TransitManager implements ModInitializer {
         Mappings.registerCommands((dispatcher) -> {
             CommandHandler.registerCommands(dispatcher);
         });
-
-        /* Abort MTR Path Generation Thread on Server Shutdown */
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            for(Level world : server.getAllLevels()) {
-                RailwayData data = RailwayData.getInstance(world);
-                if(data != null) {
-                    depotPathToBeInterrupted.addAll(((RailwayDataPathGenerationModuleAccessorMixin)data.railwayDataPathGenerationModule).getGeneratingPathThreads().keySet());
-                    for(Long id : new ArrayList<>(depotPathToBeInterrupted)) {
-                        data.railwayDataPathGenerationModule.generatePath(server, id);
-                        LOGGER.info("[TransitManager] Terminating Path Generation Thread for Depot ID: " + id + " as server is shutting down!");
-                    }
-                }
-            }
-        });
     }
 }
