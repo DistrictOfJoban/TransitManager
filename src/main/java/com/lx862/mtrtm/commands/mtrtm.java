@@ -1,7 +1,7 @@
-package com.lx.mtrtm.commands;
+package com.lx862.mtrtm.commands;
 
-import com.lx.mtrtm.config.Config;
-import com.lx.mtrtm.Mappings;
+import com.lx862.mtrtm.config.Config;
+import com.lx862.mtrtm.Mappings;
 import com.mojang.brigadier.CommandDispatcher;
 import java.util.ArrayList;
 import java.util.List;

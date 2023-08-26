@@ -1,6 +1,6 @@
-package com.lx.mtrtm.mixin;
+package com.lx862.mtrtm.mixin;
 
-import com.lx.mtrtm.config.Config;
+import com.lx862.mtrtm.config.Config;
 import mtr.MTR;
 import mtr.data.RailwayDataRouteFinderModule;
 import org.spongepowered.asm.mixin.Mixin;

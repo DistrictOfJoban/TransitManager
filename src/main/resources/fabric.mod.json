@@ -19,7 +19,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.lx.mtrtm.TransitManager"
+      "com.lx862.mtrtm.TransitManager"
     ]
   },
   "mixins": [

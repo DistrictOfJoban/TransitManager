@@ -1,7 +1,7 @@
-package com.lx.mtrtm;
+package com.lx862.mtrtm;
 
+import com.lx862.mtrtm.commands.*;
 import com.mojang.brigadier.CommandDispatcher;
-import com.lx.mtrtm.commands.*;
 
 public class CommandHandler {
     public static void registerCommands(CommandDispatcher<net.minecraft.commands.CommandSourceStack> dispatcher) {

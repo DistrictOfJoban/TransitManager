@@ -1,26 +1,26 @@
-package com.lx.mtrtm.commands;
+package com.lx862.mtrtm.commands;
 
-import com.lx.mtrtm.Mappings;
-import com.lx.mtrtm.Util;
+import com.lx862.mtrtm.Mappings;
+import com.lx862.mtrtm.Util;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import mtr.data.Depot;
 import mtr.data.RailwayData;
+import mtr.data.Station;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import java.util.List;
 
-public class warpdepot {
+public class warpstn {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("warpdepot")
+        dispatcher.register(Commands.literal("warpstn")
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.argument("name", StringArgumentType.greedyString())
                         .suggests((commandContext, suggestionsBuilder) -> {
                             RailwayData data = RailwayData.getInstance(commandContext.getSource().getLevel());
                                 String target = suggestionsBuilder.getRemainingLowerCase();
 
-                                List<String> toBeSuggested = Util.formulateMatchingString(target, data.depots.stream().map(e -> e.name).toList());
+                                List<String> toBeSuggested = Util.formulateMatchingString(target, data.stations.stream().map(e -> e.name).toList());
                                 for(String stn : toBeSuggested) {
                                     suggestionsBuilder.suggest(stn);
                                 }
@@ -29,9 +29,9 @@ public class warpdepot {
                         )
                         .executes(context -> {
                             String name = StringArgumentType.getString(context, "name");
-                            Depot stn = Util.findDepot(name, context.getSource().getLevel());
+                            Station stn = Util.findStation(name, context.getSource().getLevel());
                             if(stn == null) {
-                                context.getSource().sendSuccess(Mappings.literalText("Cannot find depot."), false);
+                                context.getSource().sendSuccess(Mappings.literalText("Cannot find station."), false);
                                 return 1;
                             }
 

@@ -1,7 +1,7 @@
-package com.lx.mtrtm.mixin;
+package com.lx862.mtrtm.mixin;
 
-import com.lx.mtrtm.TransitManager;
-import com.lx.mtrtm.config.Config;
+import com.lx862.mtrtm.TransitManager;
+import com.lx862.mtrtm.config.Config;
 import mtr.data.RailwayDataPathGenerationModule;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Final;

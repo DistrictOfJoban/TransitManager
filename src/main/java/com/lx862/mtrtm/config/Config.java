@@ -1,7 +1,7 @@
-package com.lx.mtrtm.config;
+package com.lx862.mtrtm.config;
 
 import com.google.gson.*;
-import com.lx.mtrtm.TransitManager;
+import com.lx862.mtrtm.TransitManager;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.nio.file.Files;

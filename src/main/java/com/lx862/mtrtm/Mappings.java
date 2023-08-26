@@ -1,4 +1,4 @@
-package com.lx.mtrtm;
+package com.lx862.mtrtm;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;

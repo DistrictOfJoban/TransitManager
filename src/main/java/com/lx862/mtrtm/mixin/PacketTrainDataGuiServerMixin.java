@@ -1,7 +1,7 @@
-package com.lx.mtrtm.mixin;
+package com.lx862.mtrtm.mixin;
 
-import com.lx.mtrtm.Mappings;
-import com.lx.mtrtm.Util;
+import com.lx862.mtrtm.Mappings;
+import com.lx862.mtrtm.Util;
 import mtr.data.RailwayData;
 import mtr.data.Route;
 import mtr.data.Station;

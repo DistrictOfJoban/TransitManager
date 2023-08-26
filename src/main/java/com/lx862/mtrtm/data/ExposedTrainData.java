@@ -1,4 +1,4 @@
-package com.lx.mtrtm.data;
+package com.lx862.mtrtm.data;
 
 import mtr.data.TrainServer;
 import net.minecraft.world.phys.Vec3;

@@ -1,6 +1,6 @@
-package com.lx.mtrtm.mixin;
+package com.lx862.mtrtm.mixin;
 
-import com.lx.mtrtm.TransitManager;
+import com.lx862.mtrtm.TransitManager;
 import mtr.data.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

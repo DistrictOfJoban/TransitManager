@@ -1,10 +1,10 @@
-package com.lx.mtrtm.commands;
+package com.lx862.mtrtm.commands;
 
-import com.lx.mtrtm.data.ExposedTrainData;
-import com.lx.mtrtm.Mappings;
-import com.lx.mtrtm.Util;
-import com.lx.mtrtm.mixin.TrainAccessorMixin;
-import com.lx.mtrtm.mixin.TrainServerAccessorMixin;
+import com.lx862.mtrtm.data.ExposedTrainData;
+import com.lx862.mtrtm.Mappings;
+import com.lx862.mtrtm.Util;
+import com.lx862.mtrtm.mixin.TrainAccessorMixin;
+import com.lx862.mtrtm.mixin.TrainServerAccessorMixin;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import mtr.data.*;

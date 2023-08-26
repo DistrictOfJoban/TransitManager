@@ -1,4 +1,4 @@
-package com.lx.mtrtm.mixin;
+package com.lx862.mtrtm.mixin;
 
 import mtr.data.Train;
 import net.minecraft.world.SimpleContainer;

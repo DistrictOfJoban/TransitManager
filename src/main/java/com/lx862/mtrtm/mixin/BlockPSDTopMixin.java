@@ -1,9 +1,8 @@
-package com.lx.mtrtm.mixin;
+package com.lx862.mtrtm.mixin;
 
-import com.lx.mtrtm.Mappings;
-import com.lx.mtrtm.config.Config;
+import com.lx862.mtrtm.Mappings;
+import com.lx862.mtrtm.config.Config;
 import mtr.block.BlockPSDTop;
-import mtr.block.IBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;

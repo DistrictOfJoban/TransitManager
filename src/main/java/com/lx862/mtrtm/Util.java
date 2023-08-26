@@ -1,9 +1,9 @@
-package com.lx.mtrtm;
+package com.lx862.mtrtm;
 
-import com.lx.mtrtm.data.ExposedTrainData;
-import com.lx.mtrtm.mixin.SidingAccessorMixin;
-import com.lx.mtrtm.mixin.TrainAccessorMixin;
-import com.lx.mtrtm.mixin.TrainServerAccessorMixin;
+import com.lx862.mtrtm.data.ExposedTrainData;
+import com.lx862.mtrtm.mixin.SidingAccessorMixin;
+import com.lx862.mtrtm.mixin.TrainAccessorMixin;
+import com.lx862.mtrtm.mixin.TrainServerAccessorMixin;
 import mtr.data.*;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;

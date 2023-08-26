@@ -1,6 +1,6 @@
-package com.lx.mtrtm.commands;
+package com.lx862.mtrtm.commands;
 
-import com.lx.mtrtm.Mappings;
+import com.lx862.mtrtm.Mappings;
 import com.mojang.brigadier.CommandDispatcher;
 import mtr.data.Platform;
 import mtr.data.RailwayData;

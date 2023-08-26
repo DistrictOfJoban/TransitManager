@@ -1,21 +1,17 @@
-package com.lx.mtrtm.commands;
+package com.lx862.mtrtm.commands;
 
-import com.lx.mtrtm.Mappings;
-import com.lx.mtrtm.TransitManager;
-import com.lx.mtrtm.Util;
-import com.lx.mtrtm.data.ExposedTrainData;
-import com.lx.mtrtm.mixin.SidingAccessorMixin;
-import com.lx.mtrtm.mixin.TrainAccessorMixin;
-import com.lx.mtrtm.mixin.TrainServerAccessorMixin;
+import com.lx862.mtrtm.Mappings;
+import com.lx862.mtrtm.TransitManager;
+import com.lx862.mtrtm.Util;
+import com.lx862.mtrtm.data.ExposedTrainData;
+import com.lx862.mtrtm.mixin.TrainAccessorMixin;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import mtr.data.RailType;
 import mtr.data.RailwayData;
 import mtr.data.Siding;
-import mtr.data.TrainServer;
 import mtr.path.PathData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandRuntimeException;
@@ -24,8 +20,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 public class train {
 

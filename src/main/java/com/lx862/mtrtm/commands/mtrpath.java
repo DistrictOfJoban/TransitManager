@@ -1,9 +1,9 @@
-package com.lx.mtrtm.commands;
+package com.lx862.mtrtm.commands;
 
-import com.lx.mtrtm.Mappings;
-import com.lx.mtrtm.TransitManager;
-import com.lx.mtrtm.Util;
-import com.lx.mtrtm.mixin.RailwayDataPathGenerationModuleAccessorMixin;
+import com.lx862.mtrtm.Mappings;
+import com.lx862.mtrtm.TransitManager;
+import com.lx862.mtrtm.Util;
+import com.lx862.mtrtm.mixin.RailwayDataPathGenerationModuleAccessorMixin;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import mtr.data.Depot;

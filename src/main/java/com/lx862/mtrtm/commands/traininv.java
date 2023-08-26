@@ -1,8 +1,8 @@
-package com.lx.mtrtm.commands;
+package com.lx862.mtrtm.commands;
 
-import com.lx.mtrtm.Mappings;
-import com.lx.mtrtm.mixin.SidingAccessorMixin;
-import com.lx.mtrtm.mixin.TrainAccessorMixin;
+import com.lx862.mtrtm.Mappings;
+import com.lx862.mtrtm.mixin.SidingAccessorMixin;
+import com.lx862.mtrtm.mixin.TrainAccessorMixin;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.context.CommandContext;
