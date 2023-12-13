@@ -23,7 +23,6 @@ public class mtrtm {
                             context.getSource().sendSuccess(Mappings.literalText("Please check whether the JSON syntax is correct!").withStyle(ChatFormatting.RED), false);
                         } else {
                             context.getSource().sendSuccess(Mappings.literalText("Config Reloaded!").withStyle(ChatFormatting.GREEN), false);
-
                         }
                         return 1;
                     }))

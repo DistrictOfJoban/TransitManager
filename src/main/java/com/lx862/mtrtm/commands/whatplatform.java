@@ -1,6 +1,7 @@
 package com.lx862.mtrtm.commands;
 
 import com.lx862.mtrtm.Mappings;
+import com.lx862.mtrtm.Util;
 import com.mojang.brigadier.CommandDispatcher;
 import mtr.data.Platform;
 import mtr.data.RailwayData;
@@ -43,7 +44,7 @@ public class whatplatform {
 
                     HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Mappings.literalText(String.join("\n", routeList)).withStyle(ChatFormatting.GREEN));
                     player.displayClientMessage(Mappings.literalText("===== Platform " + platform.name + " ====="), false);
-                    player.displayClientMessage(Mappings.literalText("Dwell: " + (platform.getDwellTime() / 2F) + "s").withStyle(ChatFormatting.GOLD), false);
+                    player.displayClientMessage(Mappings.literalText("Dwell: " + Util.getReadableTimeMs((long)(platform.getDwellTime() / 2F) * 1000L)).withStyle(ChatFormatting.GOLD), false);
                     player.displayClientMessage(Mappings.literalText("Transport Type: " + platform.transportMode.toString().toLowerCase()).withStyle(ChatFormatting.GOLD), false);
                     player.displayClientMessage(Mappings.literalText("Route List: (Hover)").withStyle(ChatFormatting.GOLD).withStyle(ChatFormatting.UNDERLINE).withStyle(style -> style.withHoverEvent(hoverEvent)), false);
                     return 1;

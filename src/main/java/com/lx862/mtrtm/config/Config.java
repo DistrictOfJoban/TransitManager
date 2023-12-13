@@ -11,9 +11,8 @@ import java.util.Collections;
 
 public class Config {
     private static final Path CONFIG_PATH = Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "transitmanager");
-    public static boolean forceKillMTRPathThread = false;
     public static int mtrJourneyPlannerTickTime = 0;
-    public static int shearPSDTopPermLevel = 0;
+    public static int shearPSDOpLevel = 0;
 
     public static boolean load() {
         if(!Files.exists(CONFIG_PATH.resolve("config.json"))) {
@@ -26,15 +25,11 @@ public class Config {
         try {
             final JsonObject jsonConfig = new JsonParser().parse(String.join("", Files.readAllLines(CONFIG_PATH.resolve("config.json")))).getAsJsonObject();
             try {
-                forceKillMTRPathThread = jsonConfig.get("forceKillMTRPathThread").getAsBoolean();
-            } catch (Exception ignored) {}
-
-            try {
                 mtrJourneyPlannerTickTime = jsonConfig.get("mtrJourneyPlannerTickTime").getAsInt();
             } catch (Exception ignored) {}
 
             try {
-                shearPSDTopPermLevel = jsonConfig.get("shearPSDTopPermLevel").getAsInt();
+                shearPSDOpLevel = jsonConfig.get("shearPSDOpLevel").getAsInt();
             } catch (Exception ignored) {}
 
         } catch (Exception e) {
@@ -47,8 +42,8 @@ public class Config {
     public static void writeConfig() {
         TransitManager.LOGGER.info("[TransitManager] Writing Config...");
         final JsonObject jsonConfig = new JsonObject();
-        jsonConfig.addProperty("forceKillMTRPathThread", forceKillMTRPathThread);
         jsonConfig.addProperty("mtrJourneyPlannerTickTime", mtrJourneyPlannerTickTime);
+        jsonConfig.addProperty("shearPSDOpLevel", shearPSDOpLevel);
 
         CONFIG_PATH.toFile().mkdirs();
 

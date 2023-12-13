@@ -1,7 +1,7 @@
 package com.lx862.mtrtm.mixin;
 
 import com.lx862.mtrtm.TransitManager;
-import com.lx862.mtrtm.config.Config;
+import it.unimi.dsi.fastutil.longs.Long2LongArrayMap;
 import mtr.data.RailwayDataPathGenerationModule;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Final;
@@ -20,31 +20,22 @@ public class RailwayDataPathGenerationModuleMixin {
     @Inject(method = "generatePath", at = @At("HEAD"), cancellable = true)
     public void generatePath(MinecraftServer minecraftServer, long depotId, CallbackInfo ci) {
         /* Abort path generation if requested */
-        if(TransitManager.depotPathToBeInterrupted.contains(depotId)) {
+        if(TransitManager.stopPathGenDepotList.contains(depotId)) {
             Thread thread = generatingPathThreads.get(depotId);
-            if(thread != null) {
-                if(Config.forceKillMTRPathThread) {
+            if(thread != null && thread.isAlive()) {
+                try {
                     thread.stop();
-                } else {
-                    thread.interrupt();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    TransitManager.LOGGER.warn("[TransitManager] Failed to abort path generation thread!");
                 }
             }
 
-            TransitManager.depotPathToBeInterrupted.remove(depotId);
+            TransitManager.stopPathGenDepotList.remove(depotId);
             generatingPathThreads.remove(depotId);
             ci.cancel();
-            return;
-        }
-
-        if(Config.forceKillMTRPathThread) {
-            /* Force kill thread before regenerating path */
-            if(generatingPathThreads.containsKey(depotId)) {
-                Thread thread = generatingPathThreads.get(depotId);
-                if(thread != null) {
-                    thread.stop();
-                }
-                generatingPathThreads.remove(depotId);
-            }
+        } else {
+            TransitManager.pathGenerationTimer.put(depotId, System.currentTimeMillis());
         }
     }
 }

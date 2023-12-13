@@ -83,9 +83,9 @@ public class whattrain {
         double remainingDwell = (trainData.train.getTotalDwellTicks() - trainData.train.getElapsedDwellTicks()) / SharedConstants.TICKS_PER_SECOND;
         int displayedDwell = (int)Math.round(remainingDwell);
         if(remainingDwell < 0) {
-            dwellString = "0s (" + Math.abs(displayedDwell) + "s overdue)";
+            dwellString = "0s (" + Math.abs(displayedDwell) + " overdue)";
         } else {
-            dwellString = displayedDwell + "s";
+            dwellString = Util.getReadableTimeMs(displayedDwell * 1000L);
         }
 
         Platform lastPlatformInRoute = null;
@@ -120,7 +120,10 @@ public class whattrain {
         MutableComponent isManual = Mappings.literalText(trainData.isManual ? trainData.isCurrentlyManual ? "Manual (Currently Manual)" : "Manual (Current ATO)" : "ATO").withStyle(ChatFormatting.GREEN);
 
         MutableComponent trainNotch = Mappings.literalText(trainData.accelerationSign == -2 ? "B2" : trainData.accelerationSign == -1 ? "B1" : trainData.accelerationSign == 0 ? "N" : trainData.accelerationSign == 1 ? "P1" : "P2").withStyle(ChatFormatting.GREEN);
-        MutableComponent PMLeft = Mappings.literalText((Math.round((((trainData.manualToAutomaticTime * 10) - trainData.manualCooldown)) / 20F)) + "s").withStyle(ChatFormatting.GREEN);
+
+        int manualToAutoTimeMs = (trainData.manualToAutomaticTime * 10) * 50;
+        int manualCooldownMs = trainData.manualCooldown * 50;
+        MutableComponent PMLeft = Mappings.literalText(Util.getReadableTimeMs(manualToAutoTimeMs - manualCooldownMs)).withStyle(ChatFormatting.GREEN);
 
         Set<UUID> ridingEntities = ((TrainAccessorMixin)trainData.train).getRidingEntities();
         StringBuilder ridingEntitiesStr = new StringBuilder();
@@ -156,7 +159,7 @@ public class whattrain {
             sendKeyValueFeedback(context, Mappings.literalText("Switching to ATO in: "), PMLeft);
         }
 
-        if(ridingEntities.size() > 0) {
+        if(!ridingEntities.isEmpty()) {
             context.getSource().sendSuccess(Mappings.literalText("Riding players: (Hover Here)").withStyle(ChatFormatting.GOLD).withStyle(style -> style.withHoverEvent(hoverEvent)), false);
         }
         return 1;

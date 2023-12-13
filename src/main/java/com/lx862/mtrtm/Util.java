@@ -209,4 +209,22 @@ public class Util {
         }
         return new Tuple<>(chinTexts, engTexts);
     }
+
+    public static String getReadableTimeMs(long ms) {
+        double seconds = ms / 1000.0;
+        double min = seconds / 60.0;
+        double sec = seconds % 60;
+        double hr = seconds / 60.0 / 60.0;
+        double day = seconds / 60.0 / 60.0 / 24.0;
+
+        if(seconds < 60) {
+            return (int)Math.round(seconds) + "s";
+        } else if(seconds < (60 * 60)) {
+            return String.format("%dm %ds", (int)min, (int)sec);
+        } else if(seconds < (60 * 60 * 24)) {
+            return String.format("%dh %dm %ds", (int)hr, (int)min, (int)sec);
+        } else {
+            return String.format("%dd %dh %dm %ds", (int)day, (int)hr, (int)min, (int)sec);
+        }
+    }
 }

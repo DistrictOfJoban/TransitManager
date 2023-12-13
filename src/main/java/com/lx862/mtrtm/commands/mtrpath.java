@@ -13,6 +13,8 @@ import mtr.packet.PacketTrainDataGuiServer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.MutableComponent;
+
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +33,9 @@ public class mtrpath {
                         for(Map.Entry<Long, Thread> entry : generatingPathThreads.entrySet()) {
                             Depot depot = railwayData.dataCache.depotIdMap.get(entry.getKey());
                             if(depot != null) {
-                                context.getSource().sendSuccess(Mappings.literalText(IGui.formatStationName(depot.name).formatted(ChatFormatting.GREEN)), false);
+                                MutableComponent text = Mappings.literalText("- " + IGui.formatStationName(depot.name)).withStyle(ChatFormatting.GREEN);
+                                MutableComponent time = Mappings.literalText(" (" + Util.getReadableTimeMs(System.currentTimeMillis() - TransitManager.pathGenerationTimer.get(depot.id)) + " elapsed)").withStyle(ChatFormatting.YELLOW);
+                                context.getSource().sendSuccess(text.append(time), false);
                             }
                         }
                     }
@@ -80,9 +84,9 @@ public class mtrpath {
                                     Depot depot = Util.findDepot(depotName, context.getSource().getLevel());
                                     if(depot != null && railwayData != null) {
                                         long id = depot.id;
-                                        TransitManager.depotPathToBeInterrupted.add(id);
+                                        TransitManager.stopPathGenDepotList.add(id);
                                         railwayData.railwayDataPathGenerationModule.generatePath(context.getSource().getServer(), id);
-                                        context.getSource().sendSuccess(Mappings.literalText("Path generation interrupted.").withStyle(ChatFormatting.GREEN), false);
+                                        context.getSource().sendSuccess(Mappings.literalText("Path generation has been forcefully stopped.").withStyle(ChatFormatting.GREEN), false);
                                         PacketTrainDataGuiServer.generatePathS2C(context.getSource().getLevel(), id, 0);
                                     }
                                     return 1;

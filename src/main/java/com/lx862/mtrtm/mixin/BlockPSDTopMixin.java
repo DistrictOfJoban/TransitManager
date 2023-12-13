@@ -21,7 +21,7 @@ public class BlockPSDTopMixin {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
     public void use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
-        if(!player.hasPermissions(Config.shearPSDTopPermLevel) && player.isHolding(Items.SHEARS)) {
+        if(!player.hasPermissions(Config.shearPSDOpLevel) && player.isHolding(Items.SHEARS)) {
             cir.setReturnValue(InteractionResult.FAIL);
             player.displayClientMessage(Mappings.literalText("You don't have permission to shear the Platform Screen Doors."), true);
         }
