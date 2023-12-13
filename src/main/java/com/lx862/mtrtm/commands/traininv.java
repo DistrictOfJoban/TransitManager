@@ -31,7 +31,7 @@ public class traininv {
         dispatcher.register(Commands.literal("traininv")
                 .requires(ctx -> ctx.hasPermission(2))
                         .then(Commands.argument("sidingID", LongArgumentType.longArg())
-                                .executes(context -> openTrainInventory(context, context.getSource().getPlayer().position(), LongArgumentType.getLong(context, "sidingID")))
+                                .executes(context -> openTrainInventory(context, context.getSource().getPlayerOrException().position(), LongArgumentType.getLong(context, "sidingID")))
                         )
         );
     }
@@ -49,7 +49,7 @@ public class traininv {
             /* The inventory is fixed to 54 slots probably for display reasons */
             SimpleContainer inventory = new SimpleContainer(54);
             SimpleContainer trainInventory = ((TrainAccessorMixin)trainServer).getInventory();
-            Inventory playerInventory = context.getSource().getPlayer().getInventory();
+            Inventory playerInventory = context.getSource().getPlayerOrException().getInventory();
             MutableComponent unusedSlotName = Mappings.literalText("Unusable Slots").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY);
 
             /* Put the item in the new inventory with 54 slots */

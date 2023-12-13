@@ -19,7 +19,7 @@ public class platform {
         dispatcher.register(Commands.literal("platform")
                 .requires(ctx -> ctx.hasPermission(2))
                 .executes(context -> {
-                    ServerPlayer player = context.getSource().getPlayer();
+                    ServerPlayer player = context.getSource().getPlayerOrException();
                     RailwayData data = RailwayData.getInstance(context.getSource().getLevel());
                     long platformId = RailwayData.getClosePlatformId(data.platforms, data.dataCache, context.getSource().getPlayer().blockPosition());
                     Platform platform = data.dataCache.platformIdMap.get(platformId);

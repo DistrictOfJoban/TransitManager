@@ -9,6 +9,7 @@ import com.lx862.mtrtm.mixin.TrainAccessorMixin;
 import com.lx862.mtrtm.mixin.TrainServerAccessorMixin;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import mtr.data.*;
@@ -160,10 +161,10 @@ public class train {
         return 1;
     }
 
-    private static int board(CommandContext<CommandSourceStack> context) {
+    private static int board(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ExposedTrainData nearestTrain = getNearestTrainOrError(context);
 
-        ((TrainAccessorMixin)nearestTrain.train).getRidingEntities().add(context.getSource().getPlayer().getUUID());
+        ((TrainAccessorMixin)nearestTrain.train).getRidingEntities().add(context.getSource().getPlayerOrException().getUUID());
         MtrUtil.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
         context.getSource().sendSuccess(Mappings.literalText("Train boarded!").withStyle(ChatFormatting.GREEN), false);
         return 1;

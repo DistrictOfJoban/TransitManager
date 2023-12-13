@@ -11,9 +11,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
@@ -34,6 +33,7 @@ public class warpstn {
                             }
                         )
                         .executes(context -> {
+                            ServerPlayer player = context.getSource().getPlayerOrException();
                             Level world = context.getSource().getLevel();
                             String name = StringArgumentType.getString(context, "name");
                             Station stn = MtrUtil.findStation(name, context.getSource().getLevel());
@@ -44,11 +44,11 @@ public class warpstn {
 
                             double midpointX = getMidPoint(stn.corner1.getA(), stn.corner2.getA());
                             double midpointZ = getMidPoint(stn.corner1.getB(), stn.corner2.getB());
-                            double playerY = context.getSource().getPlayer().getY();
+                            double playerY = player.getY();
                             BlockPos targetPos = new BlockPos(midpointX, playerY, midpointZ);
                             BlockPos finalPos = Util.getNonOccupiedPos(world, targetPos);
 
-                            context.getSource().getPlayer().dismountTo(finalPos.getX(), finalPos.getY(), finalPos.getZ());
+                            player.dismountTo(finalPos.getX(), finalPos.getY(), finalPos.getZ());
                             context.getSource().sendSuccess(Mappings.literalText("Warped to " + String.join(" ", getStationName(stn.name))).withStyle(ChatFormatting.GREEN), false);
                             return 1;
                         }))
