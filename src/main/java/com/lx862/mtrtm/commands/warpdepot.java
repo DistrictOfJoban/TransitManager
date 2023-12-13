@@ -45,7 +45,7 @@ public class warpdepot {
                             double midpointX = getMidPoint(stn.corner1.getA(), stn.corner2.getA());
                             double midpointZ = getMidPoint(stn.corner1.getB(), stn.corner2.getB());
                             double playerY = player.getY();
-                            BlockPos targetPos = new BlockPos(midpointX, playerY, midpointZ);
+                            BlockPos targetPos = new BlockPos((int)midpointX, (int)playerY, (int)midpointZ);
                             BlockPos finalPos = Util.getNonOccupiedPos(world, targetPos);
 
                             player.dismountTo(finalPos.getX(), finalPos.getY(), finalPos.getZ());
