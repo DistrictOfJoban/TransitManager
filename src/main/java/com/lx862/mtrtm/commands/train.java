@@ -1,6 +1,7 @@
 package com.lx862.mtrtm.commands;
 
 import com.lx862.mtrtm.Mappings;
+import com.lx862.mtrtm.MtrUtil;
 import com.lx862.mtrtm.TransitManager;
 import com.lx862.mtrtm.Util;
 import com.lx862.mtrtm.data.ExposedTrainData;
@@ -141,7 +142,7 @@ public class train {
         if(targetDistance != -1) {
             ((TrainAccessorMixin)trainData.train).setNextStoppingIndex(pathIndex);
             ((TrainAccessorMixin)trainData.train).setRailProgress(targetDistance);
-            Util.syncTrainToPlayers(trainData.train, context.getSource().getLevel().players());
+            MtrUtil.syncTrainToPlayers(trainData.train, context.getSource().getLevel().players());
 
             context.getSource().sendSuccess(Mappings.literalText("Jumped to distance " + Math.round(targetDistance) + "m.").withStyle(ChatFormatting.GREEN), false);
         } else {
@@ -154,7 +155,7 @@ public class train {
         ExposedTrainData nearestTrain = getNearestTrainOrError(context);
 
         ((TrainAccessorMixin)nearestTrain.train).getRidingEntities().clear();
-        Util.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
+        MtrUtil.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
         context.getSource().sendSuccess(Mappings.literalText("All passengers cleared from train!").withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
@@ -163,7 +164,7 @@ public class train {
         ExposedTrainData nearestTrain = getNearestTrainOrError(context);
 
         ((TrainAccessorMixin)nearestTrain.train).getRidingEntities().add(context.getSource().getPlayer().getUUID());
-        Util.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
+        MtrUtil.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
         context.getSource().sendSuccess(Mappings.literalText("Train boarded!").withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
@@ -183,7 +184,7 @@ public class train {
     private static int skipDwell(CommandContext<CommandSourceStack> context) {
         ExposedTrainData nearestTrain = getNearestTrainOrError(context);
         ((TrainAccessorMixin)nearestTrain.train).setElapsedDwellTicks(nearestTrain.train.getTotalDwellTicks());
-        Util.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
+        MtrUtil.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
 
         context.getSource().sendSuccess(Mappings.literalText("Dwell time skipped!").withStyle(ChatFormatting.GREEN), false);
         return 1;
@@ -206,9 +207,9 @@ public class train {
         ServerPlayer player = context.getSource().getPlayer();
         ExposedTrainData trainData;
         if (player != null) {
-            trainData = Util.getNearestTrain(context.getSource().getLevel(), context.getSource().getPlayer(), context.getSource().getPlayer().getEyePosition());
+            trainData = MtrUtil.getNearestTrain(context.getSource().getLevel(), context.getSource().getPlayer(), context.getSource().getPlayer().getEyePosition());
         } else {
-            trainData = Util.getNearestTrain(context.getSource().getLevel(), null, context.getSource().getPosition());
+            trainData = MtrUtil.getNearestTrain(context.getSource().getLevel(), null, context.getSource().getPosition());
         }
 
         if(trainData == null) {
@@ -220,7 +221,7 @@ public class train {
     // From whattrain
     public static int getNearestTrain(CommandContext<CommandSourceStack> context, ServerPlayer player) {
         RailwayData data = RailwayData.getInstance(context.getSource().getLevel());
-        ExposedTrainData trainData = Util.getNearestTrain(context.getSource().getLevel(), player, player.getEyePosition());
+        ExposedTrainData trainData = MtrUtil.getNearestTrain(context.getSource().getLevel(), player, player.getEyePosition());
 
         if(trainData == null) {
             context.getSource().sendSuccess(Mappings.literalText("Cannot find any train.").withStyle(ChatFormatting.RED), false);

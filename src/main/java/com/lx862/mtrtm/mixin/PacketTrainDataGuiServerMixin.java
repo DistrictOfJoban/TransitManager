@@ -1,7 +1,7 @@
 package com.lx862.mtrtm.mixin;
 
 import com.lx862.mtrtm.Mappings;
-import com.lx862.mtrtm.Util;
+import com.lx862.mtrtm.MtrUtil;
 import mtr.data.RailwayData;
 import mtr.data.Route;
 import mtr.data.Station;
@@ -34,7 +34,7 @@ public class PacketTrainDataGuiServerMixin {
             Route route = data.routes.stream().filter(rt -> rt.name.equals(rtName)).findFirst().orElse(null);
             if(route == null) return;
 
-            final MutableComponent title = Mappings.literalText("===== " + Util.getRouteName(route.name) + " =====").setStyle(Style.EMPTY.withColor(route.color));
+            final MutableComponent title = Mappings.literalText("===== " + MtrUtil.getRouteName(route.name) + " =====").setStyle(Style.EMPTY.withColor(route.color));
             player.displayClientMessage(title, false);
 
             for(int i = 3; i < splitted.length; i++) {
@@ -60,10 +60,10 @@ public class PacketTrainDataGuiServerMixin {
 
                 if(stn == null) continue;
                 ChatFormatting forceColor = isNextStation ? null : color;
-                Tuple<MutableComponent, MutableComponent> interchanges = Util.getInterchangeRouteNames(stn, route, data, forceColor);
+                Tuple<MutableComponent, MutableComponent> interchanges = MtrUtil.getInterchangeRouteNames(stn, route, data, forceColor);
                 MutableComponent symbol = terminus ? Mappings.literalText("Ⓣ ") : Mappings.literalText("↓ ");
                 // Send stn name
-                player.displayClientMessage(symbol.append(Mappings.literalText(Util.getRouteName(stn.name))).withStyle(color), false);
+                player.displayClientMessage(symbol.append(Mappings.literalText(MtrUtil.getRouteName(stn.name))).withStyle(color), false);
                 if(!isPreviousStation && interchanges != null) {
                     final MutableComponent interchangeChin = Mappings.literalText("可轉乘: ");
                     final MutableComponent interchangeEng = Mappings.literalText("Interchange for: ");

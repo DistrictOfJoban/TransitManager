@@ -1,6 +1,7 @@
 package com.lx862.mtrtm.commands;
 
 import com.lx862.mtrtm.Mappings;
+import com.lx862.mtrtm.MtrUtil;
 import com.lx862.mtrtm.TransitManager;
 import com.lx862.mtrtm.Util;
 import com.lx862.mtrtm.mixin.RailwayDataPathGenerationModuleAccessorMixin;
@@ -57,7 +58,7 @@ public class mtrpath {
                                 .executes(context -> {
                                     RailwayData railwayData = RailwayData.getInstance(context.getSource().getLevel());
                                     String depotName = StringArgumentType.getString(context, "depotName");
-                                    Depot depot = Util.findDepot(depotName, context.getSource().getLevel());
+                                    Depot depot = MtrUtil.findDepot(depotName, context.getSource().getLevel());
                                     if(depot != null && railwayData != null) {
                                         railwayData.railwayDataPathGenerationModule.generatePath(context.getSource().getServer(), depot.id);
                                         context.getSource().sendSuccess(Mappings.literalText("Refreshing " + String.join(" ", depot.name) + " (" + depot.routeIds.size() + " Routes instructions)").withStyle(ChatFormatting.GREEN), false);
@@ -81,7 +82,7 @@ public class mtrpath {
                                 .executes(context -> {
                                     RailwayData railwayData = RailwayData.getInstance(context.getSource().getLevel());
                                     String depotName = StringArgumentType.getString(context, "depotName");
-                                    Depot depot = Util.findDepot(depotName, context.getSource().getLevel());
+                                    Depot depot = MtrUtil.findDepot(depotName, context.getSource().getLevel());
                                     if(depot != null && railwayData != null) {
                                         long id = depot.id;
                                         TransitManager.stopPathGenDepotList.add(id);
