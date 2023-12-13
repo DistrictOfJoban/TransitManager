@@ -13,10 +13,10 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.level.ServerPlayer;
 import java.util.ArrayList;
 
-public class whatplatform {
+public class platform {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("whatplatform")
+        dispatcher.register(Commands.literal("platform")
                 .requires(ctx -> ctx.hasPermission(2))
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayer();
