@@ -5,6 +5,7 @@ import com.lx862.mtrtm.MtrUtil;
 import com.lx862.mtrtm.TransitManager;
 import com.lx862.mtrtm.Util;
 import com.lx862.mtrtm.data.ExposedTrainData;
+import com.lx862.mtrtm.data.TrainState;
 import com.lx862.mtrtm.mixin.TrainAccessorMixin;
 import com.lx862.mtrtm.mixin.TrainServerAccessorMixin;
 import com.mojang.brigadier.CommandDispatcher;
@@ -34,12 +35,15 @@ public class train {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("train")
                 .requires(ctx -> ctx.hasPermission(2))
-                .then(Commands.literal("collision")
-                        .then(Commands.literal("disable")
-                                .executes(context -> setCollision(context, true))
+                .then(Commands.literal("toggleCollision")
+                        .executes(context -> toggleCollision(context))
+                )
+                .then(Commands.literal("halt")
+                        .then(Commands.literal("dwell")
+                                .executes(context -> haltDwell(context))
                         )
-                        .then(Commands.literal("enable")
-                                .executes(context -> setCollision(context, false))
+                        .then(Commands.literal("speed")
+                                .executes(context -> haltSpeed(context))
                         )
                 )
                 .then(Commands.literal("board")
@@ -191,16 +195,30 @@ public class train {
         return 1;
     }
 
-    private static int setCollision(CommandContext<CommandSourceStack> context, boolean disable) {
+    private static int haltDwell(CommandContext<CommandSourceStack> context) {
         ExposedTrainData nearestTrain = getNearestTrainOrError(context);
+        boolean halted = TransitManager.getTrainState(nearestTrain.train.id, TrainState.HALT_DWELL);
+        TransitManager.setTrainState(nearestTrain.train.id, TrainState.HALT_DWELL, !halted);
 
-        if(!disable) {
-            TransitManager.disableTrainCollision.remove(nearestTrain.train.sidingId);
-        } else {
-            TransitManager.disableTrainCollision.add(nearestTrain.train.sidingId);
-        }
+        context.getSource().sendSuccess(Mappings.literalText("Dwell timer for the nearest train has been " + (!halted ? "paused" : "resumed")).withStyle(ChatFormatting.GREEN), false);
+        return 1;
+    }
 
-        context.getSource().sendSuccess(Mappings.literalText("Collision detection for the nearest train is now " + (disable ? "disabled" : "enabled")).withStyle(ChatFormatting.GREEN), false);
+    private static int haltSpeed(CommandContext<CommandSourceStack> context) {
+        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
+        boolean halted = TransitManager.getTrainState(nearestTrain.train.id, TrainState.HALT_SPEED);
+        TransitManager.setTrainState(nearestTrain.train.id, TrainState.HALT_SPEED, !halted);
+
+        context.getSource().sendSuccess(Mappings.literalText("The nearest train has " + (!halted ? "been brought to a halt" : "resumed it's operation")).withStyle(ChatFormatting.GREEN), false);
+        return 1;
+    }
+
+    private static int toggleCollision(CommandContext<CommandSourceStack> context) {
+        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
+        boolean skipCollision = TransitManager.getTrainState(nearestTrain.train.id, TrainState.SKIP_COLLISION);
+        TransitManager.setTrainState(nearestTrain.train.id, TrainState.SKIP_COLLISION, !skipCollision);
+
+        context.getSource().sendSuccess(Mappings.literalText("Collision detection for the nearest train is now " + (!skipCollision ? "disabled" : "enabled")).withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
