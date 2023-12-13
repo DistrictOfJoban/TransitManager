@@ -144,7 +144,6 @@ public class train {
                     }
 
                     if(!next && dist < currentRailProgress) {
-
                         if((trainData.train.getSpeed() == 0) || isPlatform || (trainData.train.getSpeed() > 0 && justOneMorePath) /* 1 more path if train is running */) {
                             targetDistance = dist;
                             pathIndex = pIndex;
