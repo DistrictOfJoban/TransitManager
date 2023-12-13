@@ -17,7 +17,7 @@ def minecraft_main_version = minecraft_version.split("\\.")[1] as int
 def minecraft_minor_version = minecraft_version.split("\\.").size() > 2 ? minecraft_version.split("\\.")[2] as int : 0
 def minecraft_version_str = (minecraft_major_version as String) + (minecraft_main_version as String).padLeft(2, '0') + (minecraft_minor_version as String).padLeft(2, '0')
 def use_absolute_version = (minecraft_version_str as int) >= 11903
-def mc_requirement = use_absolute_version ? default_minecraft_version : "${minecraft_major_version}.${minecraft_main_version}.x"
+def mc_requirement = use_absolute_version ? minecraft_version : "${minecraft_major_version}.${minecraft_main_version}.x"
 
 def loader_version = project.loader_version
 def fapi_version = getModrinthVersion("fabric", minecraft_version, "fabric-api")
