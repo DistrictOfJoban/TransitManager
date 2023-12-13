@@ -122,30 +122,43 @@ public class train {
         } else if(isSiding) {
             targetDistance = distances.get(0);
         } else {
-            int i = 0;
-            IntList validPathIndex = new IntArrayList();
+            boolean justOneMorePath = false;
+            for(int i = 0; i < trainData.train.path.size(); i++) {
+                int pIndex;
+                if(next) {
+                    pIndex = i;
+                } else {
+                    pIndex = trainData.train.path.size() - 1 - i;
+                }
 
-            for(PathData path : trainData.train.path) {
+                PathData path = trainData.train.path.get(pIndex);
+
                 boolean isStoppablePlatform = path.dwellTime > 0 && path.rail.railType == RailType.PLATFORM;
+
                 if((isPlatform && isStoppablePlatform) || isPath) {
-                    validPathIndex.add(i);
-                    double dist = distances.get(i);
-                    if(dist > currentRailProgress) {
-                        if(!next) {
-                            boolean last2Path = !isPlatform;
-                            dist = distances.get(validPathIndex.getInt(Math.max(0, validPathIndex.size() - 1 - (last2Path ? 2 : 1))));
-                        }
+                    double dist = distances.get(pIndex);
+                    if(next && dist > currentRailProgress) {
                         targetDistance = dist;
-                        pathIndex = i;
+                        pathIndex = pIndex;
                         break;
                     }
+
+                    if(!next && dist < currentRailProgress) {
+
+                        if((trainData.train.getSpeed() == 0) || isPlatform || (trainData.train.getSpeed() > 0 && justOneMorePath) /* 1 more path if train is running */) {
+                            targetDistance = dist;
+                            pathIndex = pIndex;
+                            break;
+                        }
+
+                        justOneMorePath = true;
+                    }
                 }
-                i++;
             }
         }
 
         if(targetDistance != -1) {
-            ((TrainAccessorMixin)trainData.train).setNextStoppingIndex(pathIndex);
+            ((TrainAccessorMixin)trainData.train).setNextStoppingIndex(Math.max(pathIndex, ((TrainAccessorMixin) trainData.train).getNextStoppingIndex()));
             ((TrainAccessorMixin)trainData.train).setRailProgress(targetDistance);
             MtrUtil.syncTrainToPlayers(trainData.train, context.getSource().getLevel().players());
 
