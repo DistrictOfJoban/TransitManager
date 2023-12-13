@@ -55,5 +55,6 @@ public interface TrainAccessorMixin {
     @Accessor("isCurrentlyManual")
     void setCurrentlyManual(boolean isCurrentlyManual);
 
-
+    @Accessor("nextStoppingIndex")
+    void setNextStoppingIndex(int nextStoppingIndex);
 }

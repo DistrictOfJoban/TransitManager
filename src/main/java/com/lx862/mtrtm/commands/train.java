@@ -103,6 +103,7 @@ public class train {
         List<Double> distances = ((TrainAccessorMixin)trainData.train).getDistances();
 
         double targetDistance = -1;
+        int pathIndex = -1;
 
         if(isNextStop) {
             targetDistance = distances.get(((TrainAccessorMixin)trainData.train).getNextStoppingIndex());
@@ -123,6 +124,7 @@ public class train {
                             dist = distances.get(validPathIndex.getInt(Math.max(0, validPathIndex.size() - 1 - (last2Path ? 2 : 1))));
                         }
                         targetDistance = dist;
+                        pathIndex = i;
                         break;
                     }
                 }
@@ -131,6 +133,7 @@ public class train {
         }
 
         if(targetDistance != -1) {
+            ((TrainAccessorMixin)trainData.train).setNextStoppingIndex(pathIndex);
             ((TrainAccessorMixin)trainData.train).setRailProgress(targetDistance);
             Util.syncTrainToPlayers(trainData.train, context.getSource().getLevel().players());
 
