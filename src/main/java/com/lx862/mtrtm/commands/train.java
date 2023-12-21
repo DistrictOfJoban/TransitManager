@@ -6,13 +6,12 @@ import com.lx862.mtrtm.TransitManager;
 import com.lx862.mtrtm.Util;
 import com.lx862.mtrtm.data.ExposedTrainData;
 import com.lx862.mtrtm.data.TrainState;
+import com.lx862.mtrtm.mixin.SidingAccessorMixin;
 import com.lx862.mtrtm.mixin.TrainAccessorMixin;
 import com.lx862.mtrtm.mixin.TrainServerAccessorMixin;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
 import mtr.data.*;
 import mtr.path.PathData;
 import net.minecraft.ChatFormatting;
@@ -192,8 +191,8 @@ public class train {
 
         long sidingId = nearestTrain.train.sidingId;
         Siding trainSiding = railwayData.dataCache.sidingIdMap.get(sidingId);
-        trainSiding.clearTrains();
 
+        ((SidingAccessorMixin)trainSiding).getTrains().removeIf(train -> train.id == nearestTrain.train.id);
         context.getSource().sendSuccess(Mappings.literalText("Siding cleared!").withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
