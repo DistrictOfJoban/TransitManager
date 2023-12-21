@@ -1,14 +1,19 @@
 package com.lx862.mtrtm.data;
 
 public enum TrainState {
-    SKIP_COLLISION(0),
-    HALT_DWELL(1),
-    HALT_SPEED(2);
+    SKIP_COLLISION("Bypass collision", 0),
+    HALT_DWELL("Dwell stopped", 1),
+    HALT_SPEED("Speed stopped", 2);
 
     private final int pos;
+    private final String name;
 
-    TrainState(int pos) {
+    TrainState(String name, int pos) {
         this.pos = pos;
+        this.name = name;
+    }
+    public String getName() {
+        return name;
     }
 
     public int getPos() {

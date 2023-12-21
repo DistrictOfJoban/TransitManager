@@ -34,14 +34,14 @@ public class train {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("train")
                 .requires(ctx -> ctx.hasPermission(2))
-                .then(Commands.literal("toggle")
-                        .then(Commands.literal("dwellTimer")
+                .then(Commands.literal("effect")
+                        .then(Commands.literal("stopDwell")
                                 .executes(context -> haltDwell(context))
                         )
-                        .then(Commands.literal("speed")
+                        .then(Commands.literal("stopSpeed")
                                 .executes(context -> haltSpeed(context))
                         )
-                        .then(Commands.literal("collision")
+                        .then(Commands.literal("stopCollision")
                                 .executes(context -> toggleCollision(context))
                         )
                 )
@@ -229,7 +229,7 @@ public class train {
         boolean skipCollision = TransitManager.getTrainState(nearestTrain.train.id, TrainState.SKIP_COLLISION);
         TransitManager.setTrainState(nearestTrain.train.id, TrainState.SKIP_COLLISION, !skipCollision);
 
-        context.getSource().sendSuccess(Mappings.literalText("Collision detection for the nearest train is now " + (!skipCollision ? "disabled" : "enabled")).withStyle(ChatFormatting.GREEN), false);
+        context.getSource().sendSuccess(Mappings.literalText("Collision detection for the nearest train is now " + (!skipCollision ? "bypassed" : "reset to normal")).withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
@@ -350,6 +350,19 @@ public class train {
             ridingEntitiesStr.append(ridingPlayer.getGameProfile().getName()).append("\n");
         }
 
+
+        boolean hasEffectApplied = false;
+        MutableComponent effectText = Mappings.literalText("");
+
+        for(TrainState state : TrainState.values()) {
+            boolean enabled = TransitManager.getTrainState(trainData.train.id, state);
+            if(enabled) {
+                hasEffectApplied = true;
+                MutableComponent thisEffectText = Mappings.literalText(state.getName()).withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.UNDERLINE);
+                effectText.append(thisEffectText).append(" ");
+            }
+        }
+
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Mappings.literalText(ridingEntitiesStr.toString()).withStyle(ChatFormatting.GREEN));
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/traininv " + siding.id);
 
@@ -360,6 +373,10 @@ public class train {
         sendKeyValueFeedback(context, Mappings.literalText("Running Route: "), routeName);
         if(trainData.train.getSpeed() == 0 && trainData.train.getTotalDwellTicks() > 0) {
             sendKeyValueFeedback(context, Mappings.literalText("Dwell left: "), dwell);
+        }
+
+        if(hasEffectApplied) {
+            sendKeyValueFeedback(context, Mappings.literalText("Effect applied: "), effectText);
         }
 
         if(destinationName != null) {
