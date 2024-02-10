@@ -9,8 +9,13 @@ import java.util.function.Consumer;
 
 /* Provide cross MC version methods */
 public class Mappings {
+
     public static MutableComponent literalText(String content) {
-        return Component.literal(content);
+        #if MC_VERSION <= "11802"
+            return new net.minecraft.network.chat.TextComponent(content);
+        #else
+            return Component.literal(content);
+        #endif
     }
 
     public static void registerCommands(Consumer<CommandDispatcher<CommandSourceStack>> callback) {

@@ -67,7 +67,7 @@ public class traininv {
                 return ChestMenu.sixRows(syncId, playerInventory, inventory);
             }, Mappings.literalText(trainServer.trainId + " (Read-Only)"));
 
-            context.getSource().getPlayer().openMenu(screen);
+            context.getSource().getPlayerOrException().openMenu(screen);
         }
         return 1;
     }

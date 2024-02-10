@@ -19,8 +19,8 @@ public class mtrtm {
                         List<String> error = reloadConfig();
                         if(!error.isEmpty()) {
                             String failed = String.join(",", error);
-                            context.getSource().sendSuccess(Mappings.literalText("Config Reloaded. " + failed + " failed to load.").withStyle(ChatFormatting.RED), false);
-                            context.getSource().sendSuccess(Mappings.literalText("Please check whether the JSON syntax is correct!").withStyle(ChatFormatting.RED), false);
+                            context.getSource().sendFailure(Mappings.literalText("Config Reloaded. " + failed + " failed to load.").withStyle(ChatFormatting.RED));
+                            context.getSource().sendFailure(Mappings.literalText("Please check whether the JSON syntax is correct!").withStyle(ChatFormatting.RED));
                         } else {
                             context.getSource().sendSuccess(Mappings.literalText("Config Reloaded!").withStyle(ChatFormatting.GREEN), false);
                         }

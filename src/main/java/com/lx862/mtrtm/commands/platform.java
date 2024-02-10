@@ -21,11 +21,11 @@ public class platform {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     RailwayData data = RailwayData.getInstance(context.getSource().getLevel());
-                    long platformId = RailwayData.getClosePlatformId(data.platforms, data.dataCache, context.getSource().getPlayer().blockPosition());
+                    long platformId = RailwayData.getClosePlatformId(data.platforms, data.dataCache, context.getSource().getPlayerOrException().blockPosition());
                     Platform platform = data.dataCache.platformIdMap.get(platformId);
 
                     if(platform == null) {
-                        player.displayClientMessage(Mappings.literalText("No Platform found.").withStyle(ChatFormatting.RED), false);
+                        context.getSource().sendFailure(Mappings.literalText("No nearby platform found."));
                         return 1;
                     }
 

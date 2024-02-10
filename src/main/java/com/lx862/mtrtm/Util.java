@@ -1,6 +1,9 @@
 package com.lx862.mtrtm;
 
+import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -59,6 +62,14 @@ public class Util {
             return new BlockPos(targetPos.getX(), mPos.getY(), targetPos.getZ());
         } else {
             return targetPos;
+        }
+    }
+
+    public static ServerPlayer getPlayerFromContext(CommandContext<CommandSourceStack> context) {
+        try {
+            return context.getSource().getPlayerOrException();
+        } catch (Exception ignored) {
+            return null;
         }
     }
 }

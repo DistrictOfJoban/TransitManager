@@ -84,7 +84,7 @@ public class train {
                                 )
                         )
                 )
-                .executes(context -> getNearestTrain(context, context.getSource().getPlayer()))
+                .executes(context -> getNearestTrain(context, Util.getPlayerFromContext(context)))
         );
     }
 
@@ -234,10 +234,11 @@ public class train {
     }
 
     private static ExposedTrainData getNearestTrainOrError(CommandContext<CommandSourceStack> context) throws CommandRuntimeException {
-        ServerPlayer player = context.getSource().getPlayer();
         ExposedTrainData trainData;
+        ServerPlayer player = Util.getPlayerFromContext(context);
+
         if (player != null) {
-            trainData = MtrUtil.getNearestTrain(context.getSource().getLevel(), context.getSource().getPlayer(), context.getSource().getPlayer().getEyePosition());
+            trainData = MtrUtil.getNearestTrain(context.getSource().getLevel(), player, player.getEyePosition());
         } else {
             trainData = MtrUtil.getNearestTrain(context.getSource().getLevel(), null, context.getSource().getPosition());
         }

@@ -38,7 +38,7 @@ public class warpstn {
                             String name = StringArgumentType.getString(context, "name");
                             Station stn = MtrUtil.findStation(name, context.getSource().getLevel());
                             if(stn == null) {
-                                context.getSource().sendSuccess(Mappings.literalText("Cannot find station."), false);
+                                context.getSource().sendFailure(Mappings.literalText("Cannot find station \"" + name + "\""));
                                 return 1;
                             }
 

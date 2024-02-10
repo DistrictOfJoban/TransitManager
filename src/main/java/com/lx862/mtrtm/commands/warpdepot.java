@@ -39,7 +39,7 @@ public class warpdepot {
                             Depot depot = MtrUtil.findDepots(name, context.getSource().getLevel()).stream().findAny().orElse(null);
 
                             if(depot == null) {
-                                context.getSource().sendSuccess(Mappings.literalText("Cannot find depot."), false);
+                                context.getSource().sendFailure(Mappings.literalText("Cannot find depot \"" + name + "\""));
                                 return 1;
                             }
 
