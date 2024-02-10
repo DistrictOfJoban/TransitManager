@@ -36,20 +36,21 @@ public class warpdepot {
                             ServerPlayer player = context.getSource().getPlayerOrException();
                             Level world = context.getSource().getLevel();
                             String name = StringArgumentType.getString(context, "name");
-                            Depot stn = MtrUtil.findDepot(name, context.getSource().getLevel());
-                            if(stn == null) {
+                            Depot depot = MtrUtil.findDepots(name, context.getSource().getLevel()).stream().findAny().orElse(null);
+
+                            if(depot == null) {
                                 context.getSource().sendSuccess(Mappings.literalText("Cannot find depot."), false);
                                 return 1;
                             }
 
-                            double midpointX = getMidPoint(stn.corner1.getA(), stn.corner2.getA());
-                            double midpointZ = getMidPoint(stn.corner1.getB(), stn.corner2.getB());
+                            double midpointX = getMidPoint(depot.corner1.getA(), depot.corner2.getA());
+                            double midpointZ = getMidPoint(depot.corner1.getB(), depot.corner2.getB());
                             double playerY = player.getY();
                             BlockPos targetPos = new BlockPos((int)midpointX, (int)playerY, (int)midpointZ);
                             BlockPos finalPos = Util.getNonOccupiedPos(world, targetPos);
 
                             player.dismountTo(finalPos.getX(), finalPos.getY(), finalPos.getZ());
-                            context.getSource().sendSuccess(Mappings.literalText("Warped to " + String.join(" ", getStationName(stn.name))).withStyle(ChatFormatting.GREEN), false);
+                            context.getSource().sendSuccess(Mappings.literalText("Warped to " + String.join(" ", getStationName(depot.name))).withStyle(ChatFormatting.GREEN), false);
                             return 1;
                         }))
         );

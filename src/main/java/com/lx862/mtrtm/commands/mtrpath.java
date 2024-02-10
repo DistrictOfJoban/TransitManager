@@ -56,13 +56,7 @@ public class mtrpath {
                                     return suggestionsBuilder.buildFuture();
                                 })
                                 .executes(context -> {
-                                    RailwayData railwayData = RailwayData.getInstance(context.getSource().getLevel());
-                                    String depotName = StringArgumentType.getString(context, "depotName");
-                                    Depot depot = MtrUtil.findDepot(depotName, context.getSource().getLevel());
-                                    if(depot != null && railwayData != null) {
-                                        railwayData.railwayDataPathGenerationModule.generatePath(context.getSource().getServer(), depot.id);
-                                        context.getSource().sendSuccess(Mappings.literalText("Refreshing " + String.join(" ", depot.name) + " (" + depot.routeIds.size() + " Routes instructions)").withStyle(ChatFormatting.GREEN), false);
-                                    }
+                                    mtr.generatePath(context);
                                     return 1;
                                 })
                         ))
@@ -82,14 +76,13 @@ public class mtrpath {
                                 .executes(context -> {
                                     RailwayData railwayData = RailwayData.getInstance(context.getSource().getLevel());
                                     String depotName = StringArgumentType.getString(context, "depotName");
-                                    Depot depot = MtrUtil.findDepot(depotName, context.getSource().getLevel());
-                                    if(depot != null && railwayData != null) {
+                                    MtrUtil.findDepots(depotName, context.getSource().getLevel()).forEach(depot -> {
                                         long id = depot.id;
                                         TransitManager.stopPathGenDepotList.add(id);
                                         railwayData.railwayDataPathGenerationModule.generatePath(context.getSource().getServer(), id);
                                         context.getSource().sendSuccess(Mappings.literalText("Path generation has been forcefully stopped.").withStyle(ChatFormatting.GREEN), false);
                                         PacketTrainDataGuiServer.generatePathS2C(context.getSource().getLevel(), id, 0);
-                                    }
+                                    });
                                     return 1;
                                 })
                         )

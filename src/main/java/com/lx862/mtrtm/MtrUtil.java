@@ -16,10 +16,8 @@ import net.minecraft.util.Tuple;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static mtr.packet.IPacket.PACKET_UPDATE_TRAINS;
 
@@ -94,25 +92,16 @@ public class MtrUtil {
         return null;
     }
 
-    public static Depot findDepot(String targetDepot, Level world) {
-        String trimmedTargetDepot = targetDepot.trim();
+    public static Set<Depot> findDepots(String targetDepot, Level world) {
+        String trimmedTargetDepot = targetDepot == null ? null : targetDepot.toLowerCase(Locale.ENGLISH).trim();
         RailwayData data = RailwayData.getInstance(world);
-        if(data == null) return null;
+        if(data == null) return Set.of();
 
-        Map<Long, Depot> depotMap = data.dataCache.depotIdMap;
-        for (Depot depot : depotMap.values()) {
-            if(targetDepot.equals(depot.name)) {
-                return depot;
-            }
-
-            for(String lang : depot.name.split("\\|")) {
-                if(lang.trim().equalsIgnoreCase(trimmedTargetDepot)) {
-                    return depot;
-                }
-            }
+        if(trimmedTargetDepot == null) {
+            return data.depots;
+        } else {
+            return data.depots.stream().filter(e -> e.name.toLowerCase(Locale.ENGLISH).trim().contains(trimmedTargetDepot)).collect(Collectors.toSet());
         }
-
-        return null;
     }
 
     public static String getRouteName(String str) {
