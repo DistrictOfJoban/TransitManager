@@ -47,8 +47,9 @@ public class warpstn {
                             double playerY = player.getY();
                             BlockPos targetPos = new BlockPos((int)midpointX, (int)playerY, (int)midpointZ);
                             BlockPos finalPos = Util.getNonOccupiedPos(world, targetPos);
-
-                            player.dismountTo(finalPos.getX(), finalPos.getY(), finalPos.getZ());
+                            
+                            player.removeVehicle();
+                            player.teleportTo(finalPos.getX(), finalPos.getY(), finalPos.getZ());
                             context.getSource().sendSuccess(Mappings.literalText("Warped to " + String.join(" ", getStationName(stn.name))).withStyle(ChatFormatting.GREEN), false);
                             return 1;
                         }))
