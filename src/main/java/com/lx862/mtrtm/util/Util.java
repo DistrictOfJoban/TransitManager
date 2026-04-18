@@ -1,12 +1,11 @@
-package com.lx862.mtrtm;
+package com.lx862.mtrtm.util;
 
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,26 +41,6 @@ public class Util {
             return String.format("%dh %dm %ds", (int)hr, (int)min, (int)sec);
         } else {
             return String.format("%dd %dh %dm %ds", (int)day, (int)hr, (int)min, (int)sec);
-        }
-    }
-
-    public static BlockPos getNonOccupiedPos(Level world, BlockPos targetPos) {
-        BlockState state = world.getBlockState(targetPos);
-        if(!state.isAir()) {
-            BlockPos.MutableBlockPos mPos = targetPos.mutable();
-            int offset = 0;
-
-            while(offset < world.getHeight()) {
-                offset++;
-
-                BlockState offsetState = world.getBlockState(mPos.setY(targetPos.getY() + offset));
-                if(offsetState.isAir()) {
-                    break;
-                }
-            }
-            return new BlockPos(targetPos.getX(), mPos.getY(), targetPos.getZ());
-        } else {
-            return targetPos;
         }
     }
 

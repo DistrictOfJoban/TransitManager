@@ -1,98 +1,38 @@
-import groovy.json.JsonSlurper
 plugins {
-	id 'fabric-loom' version '1.8-SNAPSHOT'
+	id 'fabric-loom' version '1.16-SNAPSHOT'
 	id 'maven-publish'
-	id "de.undercouch.download" version "4.1.2"
 }
-
-sourceCompatibility = JavaVersion.VERSION_16
-targetCompatibility = JavaVersion.VERSION_16
 
 group = project.maven_group
-
-def default_minecraft_version = "1.19.2"
-def minecraft_version = project.properties.containsKey("buildVersion") ? project.getProperties().get("buildVersion") : default_minecraft_version
-def minecraft_major_version = minecraft_version.split("\\.")[0] as int // Always return 1, unless mojang goes haywire :P
-def minecraft_main_version = minecraft_version.split("\\.")[1] as int
-def minecraft_minor_version = minecraft_version.split("\\.").size() > 2 ? minecraft_version.split("\\.")[2] as int : 0
-def minecraft_version_str = (minecraft_major_version as String) + (minecraft_main_version as String).padLeft(2, '0') + (minecraft_minor_version as String).padLeft(2, '0')
-def use_absolute_version = (minecraft_version_str as int) >= 11903
-def mc_requirement = use_absolute_version ? minecraft_version : "${minecraft_major_version}.${minecraft_main_version}.x"
-
-def loader_version = project.loader_version
-def fapi_version = getModrinthVersion("fabric", minecraft_version, "fabric-api")
-
-version = project.mod_version + "+" + "mc" + minecraft_version
+version =  "${project.mod_version}+mc${project.minecraft_version}"
 
 repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
-}
-
-if(!project.file("lib/mtr-fabric.jar").exists()) {
-	download {
-		src "https://www.minecrafttransitrailway.com/libs/${project.mtr_version}/MTR-fabric-${minecraft_version}-${project.mtr_version}.jar"
-		dest "lib/mtr-fabric.jar"
-		overwrite true
-	}
-}
-
-task setupLibrary() {
-	doLast {
-		delete("lib/mtr-fabric.jar")
-		download {
-			src "https://www.minecrafttransitrailway.com/libs/${project.mtr_version}/MTR-fabric-${minecraft_version}-${project.mtr_version}.jar"
-			dest "lib/mtr-fabric.jar"
-			overwrite true
+	exclusiveContent {
+		forRepository {
+			maven {
+				name = "Modrinth"
+				url = "https://api.modrinth.com/maven"
+			}
 		}
-        println("MTR Downloaded, you may need to refresh gradle for changes to take effect.")
-	}
-}
-
-task downloadOptimizedMod() {
-	doLast {
-		def outputPath = "run/mods/"
-
-		download {
-			src getModrinthDLURL("fabric", minecraft_version, "lazydfu")
-			dest outputPath + "dfu.jar"
-			overwrite true
-		}
-		download {
-			src getModrinthDLURL("fabric", minecraft_version, "ferrite-core")
-			dest outputPath + "ferrite-core.jar"
-			overwrite true
-		}
-		download {
-			src getModrinthDLURL("fabric", minecraft_version, "smoothboot-fabric")
-			dest outputPath + "smooth-boot.jar"
-			overwrite true
-		}
-		download {
-			src getModrinthDLURL("fabric", minecraft_version, "ksyxis")
-			dest outputPath + "ksyxis.jar"
-			overwrite true
+		filter {
+			includeGroup "maven.modrinth"
 		}
 	}
+
+	maven { url 'https://repo.sleeping.town/' }
 }
 
 dependencies {
 	// To change the versions see the gradle.properties file
-	annotationProcessor "systems.manifold:manifold-preprocessor:+"
-	minecraft "com.mojang:minecraft:${minecraft_version}"
-	/* We're using mojmap instead of yarn because of method name conflict in MTR Mod on >= 1.19.4 */
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+
 	mappings loom.officialMojangMappings()
-	modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	modImplementation "maven.modrinth:minecraft-transit-railway:FABRIC-${rootProject.mtr_version}+${project.minecraft_version}"
 
-	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${fapi_version}"
-	modImplementation files("lib/mtr-fabric.jar")
-
-	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
-	// You may need to force-disable transitiveness on them.
+	implementation "folk.sisby:kaleido-config:${kaleido_config_version}"
+	include "folk.sisby:kaleido-config:${kaleido_config_version}"
 }
 
 processResources {
@@ -101,7 +41,7 @@ processResources {
 	filesMatching("fabric.mod.json") {
 		expand (
 			"version": project.version,
-			"mc_version": mc_requirement
+			"mc_version": project.minecraft_version
 		)
 	}
 }
@@ -118,7 +58,6 @@ tasks.withType(JavaCompile).configureEach {
 	if (JavaVersion.current().isJava9Compatible()) {
 		 it.options.release = targetVersion
 	}
-	options.compilerArgs += ['-Xplugin:Manifold', '-AMC_VERSION=' + minecraft_version_str]
 }
 
 java {
@@ -126,11 +65,14 @@ java {
 	// if it is present.
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 }
 
 jar {
 	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}"}
+		rename { "${it}_${project.archivesName}"}
 	}
 }
 
@@ -157,33 +99,5 @@ publishing {
 				maven { url 'https://www.jitpack.io' }
 				maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 			}
-
-			afterEvaluate {
-				for (def task in it.tasks) {
-					if (!project.file("lib/mtr-fabric.jar").exists()) {
-						task.dependsOn rootProject.tasks.setupLibrary
-					}
-				}
-			}
 		}
-}
-
-static def getModrinthVersion(loader, minecraftVersion, projectId) {
-	def versionsArray = new JsonSlurper().parse(("https://api.modrinth.com/v2/project/" + projectId + "/version").toURL())
-	for (def versionElement : versionsArray) {
-		if (versionElement["loaders"].contains(loader) && versionElement["game_versions"].contains(minecraftVersion)) {
-			return versionElement["version_number"]
-		}
-	}
-	return ""
-}
-
-static def getModrinthDLURL(loader, minecraftVersion, projectId) {
-	def versionsArray = new JsonSlurper().parse(("https://api.modrinth.com/v2/project/" + projectId + "/version").toURL())
-	for (def versionElement : versionsArray) {
-		if (versionElement["loaders"].contains(loader) && versionElement["version_type"] == "release" && versionElement["game_versions"].contains(minecraftVersion)) {
-			return versionElement["files"][0]["url"].toURL()
-		}
-	}
-	return ""
 }

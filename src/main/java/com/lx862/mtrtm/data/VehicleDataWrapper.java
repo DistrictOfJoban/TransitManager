@@ -1,12 +1,10 @@
 package com.lx862.mtrtm.data;
 
-import mtr.data.TrainServer;
 import net.minecraft.world.phys.Vec3;
-import java.util.Set;
-import java.util.UUID;
+import org.mtr.core.data.Vehicle;
 
-public class ExposedTrainData {
-    public TrainServer train;
+public class VehicleDataWrapper {
+    public Vehicle vehicle;
     public long routeId;
     public Vec3[] positions;
     public boolean isManual;
@@ -15,10 +13,12 @@ public class ExposedTrainData {
     public int manualCooldown;
     public int manualToAutomaticTime;
 
-    public ExposedTrainData(TrainServer server, long routeId, Vec3[] positions, boolean isManual) {
-        this.train = server;
+    public VehicleDataWrapper(Vehicle vehicle, long routeId, Vec3[] positions, boolean isManual) {
+        this.vehicle = vehicle;
         this.routeId = routeId;
         this.positions = positions;
         this.isManual = isManual;
+        this.isCurrentlyManual = vehicle.vehicleExtraData.getIsCurrentlyManual();
+        this.accelerationSign = vehicle.vehicleExtraData.getPowerLevel();
     }
 }

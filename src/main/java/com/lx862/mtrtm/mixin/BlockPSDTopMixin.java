@@ -1,29 +1,22 @@
 package com.lx862.mtrtm.mixin;
 
-import com.lx862.mtrtm.Mappings;
-import com.lx862.mtrtm.config.Config;
-import mtr.block.BlockPSDTop;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
+import com.lx862.mtrtm.config.TMConfig;
+import org.mtr.mapping.holder.*;
+import org.mtr.mapping.mapper.TextHelper;
+import org.mtr.mod.block.BlockPSDTop;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(BlockPSDTop.class)
+@Mixin(value = BlockPSDTop.class, remap = false)
 public class BlockPSDTopMixin {
 
-    @Inject(method = "use", at = @At("HEAD"), cancellable = true)
-    public void use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand interactionHand, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
-        if(!player.hasPermissions(Config.shearPSDOpLevel) && player.isHolding(Items.SHEARS)) {
-            cir.setReturnValue(InteractionResult.FAIL);
-            player.displayClientMessage(Mappings.literalText("You don't have permission to shear the Platform Screen Doors."), true);
+    @Inject(method = "onUse2", at = @At("HEAD"), cancellable = true)
+    public void use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit, CallbackInfoReturnable<ActionResult> cir) {
+        if(!player.hasPermissionLevel(TMConfig.INSTANCE.shearPSDOpLevel) && player.isHolding(org.mtr.mapping.holder.Items.getShearsMapped())) {
+            cir.setReturnValue(ActionResult.FAIL);
+            player.sendMessage(Text.cast(TextHelper.literal("You don't have permission to shear the Platform Screen Doors.")), true);
         }
     }
 }

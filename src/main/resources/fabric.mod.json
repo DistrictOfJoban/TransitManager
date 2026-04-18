@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "id": "mtrtm",
+  "id": "mtrate",
   "version": "${version}",
 
   "name": "TransitManager",
   "description": "Add commands that allows you to have better control of trains in the Minecraft Transit Railway Mod",
   "authors": [
-    "LX86"
+    "AmberFrost"
   ],
   "contact": {
     "homepage": "https://github.com/DistrictOfJoban/TransitManager",
@@ -14,8 +14,7 @@
   },
 
   "license": "MIT",
-  "icon": "assets/mtrtm/icon.png",
-
+  "icon": "assets/mtrate/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -27,12 +26,8 @@
   ],
 
   "depends": {
-    "fabricloader": ">=0.9",
-    "fabric": "*",
+    "fabric-api": "*",
     "minecraft": "${mc_version}",
-    "mtr": "*"
-  },
-  "suggests": {
-    "another-mod": "*"
+    "mtr": ">=4.0.4"
   }
 }
