@@ -1,17 +1,15 @@
 package com.lx862.mtrtm.util;
 
-import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
+import org.mtr.core.tool.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Util {
 
-    public static double getManhattenDistance(Vec3 pos1, Vec3 pos2) {
+    public static double getManhattenDistance(Vector pos1, Vector pos2) {
         return Math.abs(pos2.x() - pos1.x()) + Math.abs(pos2.y() - pos1.y()) + Math.abs(pos2.z() - pos1.z());
     }
 
@@ -44,11 +42,7 @@ public class Util {
         }
     }
 
-    public static ServerPlayer getPlayerFromContext(CommandContext<CommandSourceStack> context) {
-        try {
-            return context.getSource().getPlayerOrException();
-        } catch (Exception ignored) {
-            return null;
-        }
+    public static Vector toVector(Vec3 vec3) {
+        return new Vector(vec3.x(), vec3.y(), vec3.z());
     }
 }

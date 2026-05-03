@@ -1,43 +1,37 @@
 package com.lx862.mtrtm.commands;
 
-import com.lx862.mtrtm.data.VehicleDataWrapper;
+import com.lx862.mtrtm.data.TargetVehicle;
 import com.lx862.mtrtm.mixin.InitAccessorMixin;
 import com.lx862.mtrtm.mixin.MainAccessorMixin;
+import com.lx862.mtrtm.mixin.VehicleAccessorMixin;
 import com.lx862.mtrtm.util.MtrUtil;
+import com.lx862.mtrtm.util.Util;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.level.ServerPlayer;
 import org.mtr.core.Main;
-import org.mtr.core.data.Position;
-import org.mtr.core.data.SavedRailBase;
+import org.mtr.core.data.*;
 import org.mtr.core.simulation.Simulator;
+import org.mtr.core.tool.Vector;
 import org.mtr.mapping.holder.MutableText;
 import org.mtr.mapping.holder.Style;
+import org.mtr.mapping.holder.TextColor;
 import org.mtr.mapping.holder.TextFormatting;
 import org.mtr.mapping.mapper.TextHelper;
+import org.mtr.mod.data.IGui;
 
 public class TrainCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-//        dispatcher.register(Commands.literal("train")
-//                .requires(ctx -> ctx.hasPermission(2))
-//                .then(Commands.literal("halt")
-//                        .then(Commands.literal("dwell")
-//                                .executes(context -> haltDwell(context))
-//                        )
-//                        .then(Commands.literal("speed")
-//                                .executes(context -> haltSpeed(context))
-//                        )
-//                )
-//                .then(Commands.literal("toggleCollision")
-//                        .executes(context -> toggleCollision(context))
-//                )
+        dispatcher.register(Commands.literal("train")
+                .requires(ctx -> ctx.hasPermission(2))
 //                .then(Commands.literal("board")
 //                        .executes(context -> board(context))
 //                )
@@ -77,12 +71,11 @@ public class TrainCommand {
 //                                )
 //                        )
 //                )
-//                .executes(context -> getNearestTrain(context, Util.getPlayerFromContext(context)))
-//        );
+                .executes(TrainCommand::getNearestVehicle)
+        );
     }
 
     private static int deploy(CommandContext<CommandSourceStack> context) {
-//        RailwayData data = RailwayData.getInstance(context.getSource().getLevel());
 //        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
 //
 //        List<Siding> trainSidings = data.sidings.stream().filter(siding -> siding.id == nearestTrain.train.sidingId).toList();
@@ -226,164 +219,105 @@ public class TrainCommand {
         return 1;
     }
 
-    private static VehicleDataWrapper getNearestTrainOrError(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        VehicleDataWrapper trainData = null;
-        ServerPlayer player = context.getSource().getPlayerOrException();
+    private static TargetVehicle requireNearestVehicle(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ServerPlayer player = context.getSource().getPlayer();
         Main tsc = InitAccessorMixin.getMain();
         Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
 
+        TargetVehicle targetVehicle = MtrUtil.getNearestTrain(player, Util.toVector(context.getSource().getPosition()), simulator);
 
-        if (player != null) {
-            trainData = MtrUtil.getNearestTrain(context.getSource().getLevel(), player, player.getEyePosition(), simulator);
-        } else {
-            trainData = MtrUtil.getNearestTrain(context.getSource().getLevel(), null, context.getSource().getPosition(), simulator);
+        if(targetVehicle == null) {
+            throw new SimpleCommandExceptionType(TextHelper.literal("Cannot find the nearest vehicle!").data).create();
         }
-
-        if(trainData == null) {
-            throw new SimpleCommandExceptionType(TextHelper.literal("Cannot find any nearest train!").data).create();
-        }
-        return trainData;
+        return targetVehicle;
     }
 
-    public static int getNearestTrain(CommandContext<CommandSourceStack> context, ServerPlayer player) {
-//        RailwayData data = RailwayData.getInstance(context.getSource().getLevel());
-//        ExposedTrainData trainData = MtrUtil.getNearestTrain(context.getSource().getLevel(), player, player.getEyePosition());
-//
-//        if(trainData == null) {
-//            context.getSource().sendSuccess(Mappings.literalText("Cannot find any train.").withStyle(ChatFormatting.RED), false);
-//            return 1;
-//        }
-//
-//        if(trainData.isManual) {
-//            trainData.isCurrentlyManual = ((TrainAccessorMixin)trainData.train).getIsCurrentlyManual();
-//            if(trainData.isCurrentlyManual) {
-//                trainData.accelerationSign = ((TrainAccessorMixin) trainData.train).getManualNotch();
-//                trainData.manualCooldown = ((TrainServerAccessorMixin)trainData.train).getManualCoolDown();
-//                trainData.manualToAutomaticTime = ((TrainAccessorMixin) trainData.train).getManualToAutomaticTime();
-//            }
-//        }
-//
-//        long sidingId = trainData.train.sidingId;
-//        List<Siding> sidingList = data.sidings.stream().filter(sd -> sd.id == sidingId).toList();
-//
-//        if(sidingList.isEmpty()) {
-//            context.getSource().sendSuccess(Mappings.literalText("Cannot find corresponding siding.").withStyle(ChatFormatting.RED), false);
-//            return 1;
-//        }
-//
-//        Siding siding = sidingList.get(0);
-//        Depot sidingDepot = null;
-//
-//        for(Depot depot : data.depots) {
-//            if(depot.inArea(siding.getMidPos().getX(), siding.getMidPos().getZ())) {
-//                sidingDepot = depot;
-//                break;
-//            }
-//        }
-//
-//        if(sidingDepot == null) {
-//            context.getSource().sendSuccess(Mappings.literalText("No depot associated with that siding.").withStyle(ChatFormatting.RED), false);
-//            return 1;
-//        }
-//
-//        List<Route> trainRoutes = data.routes.stream().filter(rt -> rt.id == trainData.routeId).toList();
-//        String currentRouteName = "N/A";
-//        final int currentRouteColor;
-//        String currentRouteDestination = null;
-//        String dwellString;
-//
-//        double remainingDwell = (trainData.train.getTotalDwellTicks() - trainData.train.getElapsedDwellTicks()) / SharedConstants.TICKS_PER_SECOND;
-//        int displayedDwell = (int)Math.round(remainingDwell);
-//        if(remainingDwell < 0) {
-//            dwellString = "0s (" + Math.abs(displayedDwell) + " overdue)";
-//        } else {
-//            dwellString = Util.getReadableTimeMs(displayedDwell * 1000L);
-//        }
-//
-//        Platform lastPlatformInRoute = null;
-//
-//        if(!trainRoutes.isEmpty()) {
-//            Route runningRoute = trainRoutes.get(0);
-//            currentRouteColor = runningRoute.color;
-//            currentRouteName = IGui.formatStationName(runningRoute.name);
-//
-//            long lastPlatformId = runningRoute.getLastPlatformId();
-//            Station lastStation = data.dataCache.platformIdToStation.get(lastPlatformId);
-//            lastPlatformInRoute = data.dataCache.platformIdMap.get(lastPlatformId);
-//            if(lastStation == null) {
-//                BlockPos midPos = lastPlatformInRoute.getMidPos();
-//                currentRouteDestination = "Platform " + lastPlatformInRoute.name + " (" + midPos.getX() + ", " + midPos.getY() + ", " + midPos.getZ()  + ")";
-//            } else {
-//                currentRouteDestination = IGui.formatStationName(lastStation.name) + " (" + lastPlatformInRoute.name + ")";
-//            }
-//        } else {
-//            currentRouteColor = 0;
-//        }
-//
-//        final int depotColor = sidingDepot.color;
-//        final String depotSidingName = IGui.formatStationName(sidingDepot.name)  + " (Siding " + siding.name + ")";
-//
-//        MutableComponent depotName = Mappings.literalText(depotSidingName).withStyle(style -> style.withColor(depotColor));
-//        MutableComponent routeName = Mappings.literalText(currentRouteName).withStyle(style -> style.withColor(currentRouteColor));
-//        MutableComponent destinationName = currentRouteDestination == null ? null : Mappings.literalText(currentRouteDestination).withStyle(ChatFormatting.GREEN);
-//        String title = IGui.formatStationName(trainData.train.trainId) + " (" + trainData.train.trainCars + "-cars)";
-//        MutableComponent pos = Mappings.literalText(String.format("%d, %d, %d", Math.round(trainData.positions[0].x()), Math.round(trainData.positions[0].y()), Math.round(trainData.positions[0].z()))).withStyle(ChatFormatting.GREEN);
-//        MutableComponent dwell = Mappings.literalText(dwellString).withStyle(ChatFormatting.GREEN);
-//        MutableComponent isManual = Mappings.literalText(trainData.isManual ? trainData.isCurrentlyManual ? "Manual (Currently Manual)" : "Manual (Current ATO)" : "ATO").withStyle(ChatFormatting.GREEN);
-//
-//        MutableComponent trainNotch = Mappings.literalText(trainData.accelerationSign == -2 ? "B2" : trainData.accelerationSign == -1 ? "B1" : trainData.accelerationSign == 0 ? "N" : trainData.accelerationSign == 1 ? "P1" : "P2").withStyle(ChatFormatting.GREEN);
-//
-//        int manualToAutoTimeMs = (trainData.manualToAutomaticTime * 10) * 50;
-//        int manualCooldownMs = trainData.manualCooldown * 50;
-//        MutableComponent PMLeft = Mappings.literalText(Util.getReadableTimeMs(manualToAutoTimeMs - manualCooldownMs)).withStyle(ChatFormatting.GREEN);
-//
-//        Set<UUID> ridingEntities = ((TrainAccessorMixin)trainData.train).getRidingEntities();
-//        StringBuilder ridingEntitiesStr = new StringBuilder();
-//        for (UUID uuid : ((TrainAccessorMixin)trainData.train).getRidingEntities()) {
-//            ServerPlayer ridingPlayer = context.getSource().getServer().getPlayerList().getPlayer(uuid);
-//            if (ridingPlayer == null) continue;
-//
-//            ridingEntitiesStr.append(ridingPlayer.getGameProfile().getName()).append("\n");
-//        }
-//
-//
-//        boolean hasEffectApplied = false;
-//        MutableComponent effectText = Mappings.literalText("");
-//
-//        for(TrainState state : TrainState.values()) {
-//            boolean enabled = TransitManager.getTrainState(trainData.train.id, state);
-//            if(enabled) {
-//                hasEffectApplied = true;
-//                MutableComponent thisEffectText = Mappings.literalText(state.getName()).withStyle(ChatFormatting.GREEN).withStyle(ChatFormatting.UNDERLINE);
-//                effectText.append(thisEffectText).append(" ");
-//            }
-//        }
+    public static int getNearestVehicle(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        Main tsc = InitAccessorMixin.getMain();
+        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
+        Vector targetPosition = Util.toVector(context.getSource().getPosition());
+        TargetVehicle targetVehicle = requireNearestVehicle(context);
 
-//        context.getSource().sendSuccess(Mappings.literalText("===== " + title + " =====").withStyle(ChatFormatting.GREEN), false);
-//        sendKeyValueFeedback(context, Mappings.literalText("Mode: "), isManual);
-//        sendKeyValueFeedback(context, Mappings.literalText("Depot/Siding: "), teleportToSavedRailText(depotName, siding));
-//        sendKeyValueFeedback(context, Mappings.literalText("Position: "), pos);
-//        sendKeyValueFeedback(context, Mappings.literalText("Running Route: "), routeName);
-//        if(trainData.train.getSpeed() == 0 && trainData.train.getTotalDwellTicks() > 0) {
-//            sendKeyValueFeedback(context, Mappings.literalText("Dwell left: "), dwell);
-//        }
-//
-//        if(hasEffectApplied) {
-//            sendKeyValueFeedback(context, Mappings.literalText("Effect applied: "), effectText);
-//        }
-//
-//        if(destinationName != null) {
-//            sendKeyValueFeedback(context, Mappings.literalText("Destination: "), teleportToSavedRailText(destinationName, lastPlatformInRoute));
-//        }
-//
-//        if(trainData.isManual && trainData.isCurrentlyManual) {
-//            sendKeyValueFeedback(context, Mappings.literalText("Train Notch: "), trainNotch);
-//            sendKeyValueFeedback(context, Mappings.literalText("Switching to ATO in: "), PMLeft);
-//        }
-//
-//        if(!ridingEntities.isEmpty()) {
-//            context.getSource().sendSuccess(Mappings.literalText("Riding players: (Hover Here)").withStyle(ChatFormatting.GOLD).withStyle(style -> style.withHoverEvent(hoverEvent)), false);
-//        }
+        Siding siding = simulator.sidings.stream().filter(sdg -> sdg.getId() == targetVehicle.vehicle.vehicleExtraData.getSidingId()).findFirst().orElse(null);
+        if(siding == null) {
+            context.getSource().sendSuccess(() -> TextHelper.literal("Cannot find corresponding siding.").formatted(TextFormatting.RED).data, false);
+            return 1;
+        }
+
+        Depot depot = siding.area;
+        if(depot == null) {
+            context.getSource().sendSuccess(() -> TextHelper.literal("No depot associated with this siding.").formatted(TextFormatting.RED).data, false);
+            return 1;
+        }
+
+        String currentRouteName = MtrUtil.getRouteName(targetVehicle.vehicle.vehicleExtraData.getThisRouteName());
+        if(currentRouteName.isEmpty()) currentRouteName = "N/A";
+        final int currentRouteColor = targetVehicle.vehicle.vehicleExtraData.getThisRouteColor();
+        String currentRouteDestination = null;
+        String dwellString;
+
+        double remainingDwell = (targetVehicle.totalDwellTime - targetVehicle.elapsedDwellTime);
+        int displayedDwell = (int)Math.round(remainingDwell);
+        if(remainingDwell < 0) {
+            dwellString = "0s (" + Util.getReadableTimeMs(displayedDwell) + " overdue)";
+        } else {
+            dwellString = Util.getReadableTimeMs(displayedDwell);
+        }
+
+        Route runningRoute = simulator.routeIdMap.get(targetVehicle.vehicle.vehicleExtraData.getThisRouteId());
+        Platform lastRoutePlatform = null;
+        if(runningRoute != null && !runningRoute.getRoutePlatforms().isEmpty()) {
+            lastRoutePlatform = runningRoute.getRoutePlatforms().get(runningRoute.getRoutePlatforms().size()-1).getPlatform();
+            Station lastStation = lastRoutePlatform.area;
+            if(lastStation == null) {
+                Position midPos = lastRoutePlatform.getMidPosition();
+                currentRouteDestination = "Platform " + lastRoutePlatform.getName() + " (" + midPos.getX() + ", " + midPos.getY() + ", " + midPos.getZ()  + ")";
+            } else {
+                currentRouteDestination = IGui.formatStationName(lastStation.getName()) + " (" + lastRoutePlatform.getName() + ")";
+            }
+        }
+
+        final String depotSidingName = IGui.formatStationName(depot.getName())  + " (Siding " + siding.getName() + ")";
+
+        MutableText manualTimeRemainingText = TextHelper.literal(Util.getReadableTimeMs(targetVehicle.manualCooldownMs)).formatted(TextFormatting.GREEN);
+        MutableText depotNameText = TextHelper.setStyle(TextHelper.literal(depotSidingName), Style.getEmptyMapped().withColor(TextColor.fromRgb(depot.getColor())));
+        MutableText routeNameText = TextHelper.setStyle(TextHelper.literal(currentRouteName), Style.getEmptyMapped().withColor(TextColor.fromRgb(currentRouteColor)));
+        MutableText destinationText = currentRouteDestination == null ? null : TextHelper.literal(currentRouteDestination).formatted(TextFormatting.GREEN);
+        MutableText dwellText = TextHelper.literal(dwellString).formatted(TextFormatting.GREEN);
+        MutableText runningModeText = TextHelper.literal(targetVehicle.isManual ? targetVehicle.isCurrentlyManual ? "Manual" : "ATO (Manual Available)" : "ATO").formatted(TextFormatting.GREEN);
+        String title = targetVehicle.vehicle.getHexId() + " (" + targetVehicle.positions.length + "-cars)";
+
+        StringBuilder ridingEntitiesStr = new StringBuilder();
+        for(int i = 0; i < targetVehicle.ridingEntities.size(); i++) {
+            VehicleRidingEntity vehicleRidingEntity = targetVehicle.ridingEntities.get(i);
+            ServerPlayer ridingPlayer = context.getSource().getServer().getPlayerList().getPlayer(vehicleRidingEntity.uuid);
+            if(ridingPlayer != null) {
+                ridingEntitiesStr.append(String.format("%s (Car %d)", ridingPlayer.getGameProfile().getName(), vehicleRidingEntity.getRidingCar()+1));
+                if(i != targetVehicle.ridingEntities.size()-1) ridingEntitiesStr.append("\n");
+            }
+        }
+
+        context.getSource().sendSuccess(() -> TextHelper.literal("===== " + title + " =====").formatted(TextFormatting.GREEN).data, false);
+        sendKeyValueFeedback(context, TextHelper.literal("Distance: "), TextHelper.literal(Math.round(Util.getManhattenDistance(targetVehicle.positions[targetVehicle.closestCar], targetPosition)) + "m"));
+        sendKeyValueFeedback(context, TextHelper.literal("Mode: "), runningModeText);
+        if(targetVehicle.isManual && targetVehicle.isCurrentlyManual) {
+            sendKeyValueFeedback(context, TextHelper.literal("Switching to ATO in: "), manualTimeRemainingText);
+        }
+        sendKeyValueFeedback(context, TextHelper.literal("Depot/Siding: "), teleportToSavedRailText(depotNameText, siding));
+        sendKeyValueFeedback(context, TextHelper.literal("Running Route: "), routeNameText);
+        sendKeyValueFeedback(context, TextHelper.literal("Schedule Deviation: "), getDeviationText(targetVehicle.vehicle));
+        if(targetVehicle.speedKmh == 0 && targetVehicle.totalDwellTime > 0) {
+            sendKeyValueFeedback(context, TextHelper.literal("Dwell left: "), dwellText);
+        }
+
+        if(destinationText != null) {
+            sendKeyValueFeedback(context, TextHelper.literal("Destination: "), teleportToSavedRailText(destinationText, lastRoutePlatform));
+        }
+
+        if(!targetVehicle.ridingEntities.isEmpty()) {
+            HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextHelper.literal(ridingEntitiesStr.toString()).formatted(TextFormatting.GREEN).data);
+            context.getSource().sendSuccess(() -> TextHelper.setStyle(TextHelper.literal("Riding players: (Hover Here)"), new Style(Style.getEmptyMapped().withColor(TextFormatting.GOLD).data.withHoverEvent(hoverEvent))).data, false);
+        }
         return 1;
     }
 
@@ -397,5 +331,16 @@ public class TrainCommand {
         HoverEvent hoverEventTp = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextHelper.literal("Click to teleport").data.withStyle(ChatFormatting.GREEN));
         ClickEvent clickEventTp = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + midPos.getX() + " " + midPos.getY() + " " + midPos.getZ());
         return new MutableText(originalText.data.withStyle(ChatFormatting.UNDERLINE).withStyle(e -> e.withHoverEvent(hoverEventTp).withClickEvent(clickEventTp)));
+    }
+
+    private static MutableText getDeviationText(Vehicle vehicle) {
+        long deviation = ((VehicleAccessorMixin)vehicle).getDeviation();
+        if(deviation > 0) {
+            return TextHelper.literal("+" + Util.getReadableTimeMs(Math.abs(deviation))).formatted(TextFormatting.RED);
+        } else if(deviation < 0) {
+            return TextHelper.literal("-" + Util.getReadableTimeMs(Math.abs(deviation))).formatted(TextFormatting.GREEN);
+        } else {
+            return TextHelper.literal("On-Time").formatted(TextFormatting.GREEN);
+        }
     }
 }

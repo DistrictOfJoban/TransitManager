@@ -1,14 +1,17 @@
 package com.lx862.mtrtm.util;
 
-import com.lx862.mtrtm.data.VehicleDataWrapper;
+import com.lx862.mtrtm.data.TargetVehicle;
 import com.lx862.mtrtm.mixin.SidingAccessorMixin;
+import com.lx862.mtrtm.mixin.VehicleAccessorMixin;
+import com.lx862.mtrtm.mixin.VehicleSchemaAccessorMixin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
 import org.mtr.core.data.*;
 import org.mtr.core.simulation.Simulator;
+import org.mtr.core.tool.Vector;
+import org.mtr.libraries.it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectImmutableList;
 import org.mtr.mapping.holder.Identifier;
 
@@ -77,16 +80,7 @@ public class MtrUtil {
     }
 
     public static String getRouteName(String str) {
-        return str.split("\\|\\|")[0].replace("|", " ");
-    }
-
-    public static String getNameChinese(String str) {
-        return str.split("\\|")[0];
-    }
-
-    public static String getNameEnglish(String str) {
-        String[] splitted = str.split("\\|");
-        return splitted.length > 1 ? splitted[1] : "";
+        return str.replace("|", " ");
     }
 
     public static BlockPos getNonOccupiedPos(Level world, BlockPos targetPos, AreaBase<?, ? extends SavedRailBase> area) {
@@ -133,61 +127,63 @@ public class MtrUtil {
         return pos;
     }
 
-    public static VehicleDataWrapper getNearestTrain(Level world, ServerPlayer player, Vec3 playerPos, Simulator simulator) {
-        List<VehicleDataWrapper> trainDataList = new ArrayList<>();
-        VehicleDataWrapper closestTrainCar = null;
+    public static TargetVehicle getNearestTrain(ServerPlayer player, Vector playerPos, Simulator simulator) {
+        TargetVehicle closestVehicle = null;
+        List<TargetVehicle> vehicles = new ArrayList<>();
 
         for(Siding siding : simulator.sidings) {
             for(Vehicle train : ((SidingAccessorMixin)(Object)siding).getVehicles()) {
-                final Vec3[] positions = new Vec3[train.getVehicleCarsAndPositions().size()];
+                var vehicleCarsAndPos = train.getVehicleCarsAndPositions();
+                final Vector[] positions = new Vector[vehicleCarsAndPos.size()];
 
-                // TODO
-//                for (int i = 0; i <= train.trainCars; i++) {
-//                    positions[i] = ((TrainAccessorMixin)train).getTheRoutePosition(((TrainAccessorMixin) train).getReversed() ? train.trainCars - i : i, train.spacing);
-//                }
+                double railProgress = ((VehicleSchemaAccessorMixin)train).getRailProgress();
+                for(int i = 0; i < positions.length; i++) {
+                    double trainLength = vehicleCarsAndPos.get(i).left().getLength();
+                    double carMidRailProgress = railProgress - (trainLength / 2);
+                    positions[i] = ((VehicleAccessorMixin)train).getPositionAt(carMidRailProgress, new DoubleArrayList());
+                    railProgress -= trainLength;
+                }
 
-                trainDataList.add(new VehicleDataWrapper(train, train.vehicleExtraData.getThisRouteId(), positions, train.vehicleExtraData.getIsManualAllowed()));
+                vehicles.add(new TargetVehicle(train, positions));
             }
         }
 
-        Vec3 closestPos = null;
-        for(VehicleDataWrapper train : trainDataList) {
-            // Player is riding, so it is most definitely the train player wants
-//            if(player != null && train.vehicle.isPlayerRiding(player)) {
-//                closestTrainCar = train;
-//                break;
-//            }
+        Vector closestPos = null;
+        for(TargetVehicle vehicle : vehicles) {
+            if(player != null) {
+                VehicleRidingEntity playerRidingEntity = vehicle.ridingEntities.stream().filter(e -> e.uuid.equals(player.getUUID())).findFirst().orElse(null);
+                // Player is riding, so it is most definitely the train player wants
+                if(playerRidingEntity != null) {
+                    vehicle.closestCar = (int)playerRidingEntity.getRidingCar();
+                    closestVehicle = vehicle;
+                    break;
+                }
+            }
 
-            for(int i = 0; i < train.positions.length; i++) {
-                if(closestTrainCar == null) {
-                    closestTrainCar = train;
-                    closestPos = train.positions[i];
+            for(int i = 0; i < vehicle.positions.length; i++) {
+                if(closestVehicle == null) {
+                    vehicle.closestCar = i;
+                    closestVehicle = vehicle;
+                    closestPos = vehicle.positions[i];
                 } else {
                     double lastTrainDistance = Util.getManhattenDistance(closestPos, playerPos);
-                    double thisTrainDistance = Util.getManhattenDistance(train.positions[i], playerPos);
+                    double thisTrainDistance = Util.getManhattenDistance(vehicle.positions[i], playerPos);
                     boolean isCloser = thisTrainDistance < lastTrainDistance;
 
                     if(isCloser) {
-                        closestTrainCar = train;
-                        closestPos = train.positions[i];
+                        vehicle.closestCar = i;
+                        closestVehicle = vehicle;
+                        closestPos = vehicle.positions[i];
                     }
                 }
             }
         }
 
-        VehicleDataWrapper trainData = closestTrainCar;
-
-        if(trainData == null) {
+        if(closestVehicle == null) {
             return null;
         }
 
-        if(trainData.isManual) {
-            if(trainData.isCurrentlyManual) {
-//                trainData.manualCooldown = ((TrainServerAccessorMixin)trainData.train).getManualCoolDown();
-//                trainData.manualToAutomaticTime = ((TrainAccessorMixin) trainData.train).getManualToAutomaticTime();
-            }
-        }
-
-        return trainData;
+        return closestVehicle;
     }
+
 }

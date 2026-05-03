@@ -5,7 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 
 public class Commands {
     public static void registerCommands(CommandDispatcher<net.minecraft.commands.CommandSourceStack> dispatcher) {
-//        train.register(dispatcher);
+        TrainCommand.register(dispatcher);
         PlatformCommand.register(dispatcher);
         WarpCommands.register(dispatcher);
     }
