@@ -26,9 +26,9 @@ public class Util {
 
     public static String getReadableTimeMs(long ms) {
         double seconds = ms / 1000.0;
-        double min = seconds / 60.0;
         double sec = seconds % 60;
-        double hr = seconds / 60.0 / 60.0;
+        double min = (seconds / 60.0) % 60;
+        double hr = (seconds / 60.0 / 60.0) % 24;
         double day = seconds / 60.0 / 60.0 / 24.0;
 
         if(seconds < 60) {

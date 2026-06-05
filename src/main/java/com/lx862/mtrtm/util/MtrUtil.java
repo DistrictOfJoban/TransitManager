@@ -32,33 +32,6 @@ public class MtrUtil {
         return new Identifier(dim.replace("/", ":"));
     }
 
-//    public static void syncTrainToPlayers(TrainServer trainServer, List<ServerPlayer> players) {
-//        FriendlyByteBuf trainPacket = PacketByteBufs.create();
-//        trainServer.writePacket(trainPacket);
-//
-//        FriendlyByteBuf packet = PacketByteBufs.create();
-//        packet.writeBytes(trainPacket);
-//
-//        for(ServerPlayer player : players) {
-//            ServerPlayNetworking.send(player, PACKET_UPDATE_TRAINS, packet);
-//        }
-//    }
-
-    public static Station findStation(String targetSta, Simulator simulator) {
-        Map<Long, Station> staMap = simulator.stationIdMap;
-        for (Map.Entry<Long, Station> entry : staMap.entrySet()) {
-            if(entry.getValue().getName().trim().equals(targetSta)) return entry.getValue();
-
-            for(String lang : entry.getValue().getName().split("\\|")) {
-                if(lang.trim().equalsIgnoreCase(targetSta)) {
-                    return entry.getValue();
-                }
-            }
-        }
-
-        return null;
-    }
-
     public static <T extends AreaBase> Set<T> findArea(String targetName, Set<T> areaBases) {
         String trimmedTargetDepot = targetName == null ? null : targetName.toLowerCase(Locale.ENGLISH).trim();
 

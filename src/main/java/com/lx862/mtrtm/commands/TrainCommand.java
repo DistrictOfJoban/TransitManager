@@ -1,16 +1,17 @@
 package com.lx862.mtrtm.commands;
 
 import com.lx862.mtrtm.data.TargetVehicle;
-import com.lx862.mtrtm.mixin.InitAccessorMixin;
-import com.lx862.mtrtm.mixin.MainAccessorMixin;
-import com.lx862.mtrtm.mixin.SidingAccessorMixin;
-import com.lx862.mtrtm.mixin.VehicleAccessorMixin;
+import com.lx862.mtrtm.mixin.*;
+import com.lx862.mtrtm.util.DepartureIndexHelper;
 import com.lx862.mtrtm.util.MtrUtil;
 import com.lx862.mtrtm.util.Util;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import org.mtr.core.generated.data.NameColorDataBaseSchema;
+import org.mtr.libraries.it.unimi.dsi.fastutil.longs.LongArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -33,18 +34,15 @@ public class TrainCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("train")
                 .requires(ctx -> ctx.hasPermission(2))
-//                .then(Commands.literal("board")
-//                        .executes(context -> board(context))
-//                )
-//                .then(Commands.literal("ejectAllPassengers")
-//                        .executes(context -> ejectPassengers(context))
-//                )
                 .then(Commands.literal("clear")
                         .executes(context -> clearNearestTrain(context))
                 )
-//                .then(Commands.literal("deploy")
-//                        .executes(context -> deploy(context))
-//                )
+                .then(Commands.literal("deploy")
+                        .then(Commands.argument("departureIndex", StringArgumentType.greedyString())
+                            .suggests(DepartureIndexHelper::suggestDepartureIndex)
+                            .executes(context -> deploy(context))
+                        )
+                )
 //                .then(Commands.literal("skipDwell")
 //                        .executes(context -> skipDwell(context))
 //                )
@@ -72,26 +70,52 @@ public class TrainCommand {
 //                                )
 //                        )
 //                )
-                .executes(TrainCommand::getNearestVehicle)
+                .executes(TrainCommand::printVehicleInfo)
         );
     }
 
-    private static int deploy(CommandContext<CommandSourceStack> context) {
-//        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
-//
-//        List<Siding> trainSidings = data.sidings.stream().filter(siding -> siding.id == nearestTrain.train.sidingId).toList();
-//        Siding trainSiding = null;
-//        if(!trainSidings.isEmpty()) {
-//            trainSiding = trainSidings.get(0);
-//        }
-//
-//        nearestTrain.train.deployTrain();
-//        context.getSource().sendSuccess(Mappings.literalText("Deploying the nearest train (Siding " + trainSiding.name + ")...").withStyle(ChatFormatting.GREEN), false);
-//        context.getSource().sendSuccess(Mappings.literalText("Train ID: " + trainSiding.getTrainId()).withStyle(ChatFormatting.GREEN), false);
-//
-//        if(nearestTrain.isManual) {
-//            context.getSource().sendSuccess(Mappings.literalText("NOTE: Train is currently in manual mode.").withStyle(ChatFormatting.YELLOW), false);
-//        }
+    private static int deploy(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        String chosenDepartureIndex = StringArgumentType.getString(context, "departureIndex");
+        int departureIndex = Integer.MAX_VALUE;
+        try {
+            departureIndex = Integer.parseInt(chosenDepartureIndex);
+        } catch (NumberFormatException e) {
+            try {
+                departureIndex = Integer.parseInt(chosenDepartureIndex.substring(2).split(" ")[0]);
+            } catch (Exception ignored) {
+            }
+        }
+
+        Main tsc = InitAccessorMixin.getMain();
+        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
+        TargetVehicle targetVehicle = requireNearestVehicle(context);
+        long sidingId = targetVehicle.vehicle.vehicleExtraData.getSidingId();
+        Siding siding = simulator.sidingIdMap.get(sidingId);
+        if(siding == null) return 0;
+        LongArrayList sidingDepartures = ((SidingAccessorMixin)(Object)siding).getDepartures();
+
+
+        if(departureIndex != -1) {
+            LongArrayList usedDepartureIndex = new LongArrayList();
+            ((SidingAccessorMixin)(Object)siding).getVehicles().forEach(e -> {
+                usedDepartureIndex.add(e.getDepartureIndex());
+            });
+
+            if(usedDepartureIndex.contains(departureIndex)) {
+                context.getSource().sendFailure(TextHelper.literal("Train already deployed!").data);
+                return 0;
+            }
+        }
+
+        if(departureIndex == Integer.MAX_VALUE || departureIndex >= sidingDepartures.size()) {
+            context.getSource().sendFailure(TextHelper.literal("Invalid departure index.").data);
+            return 0;
+        }
+
+        targetVehicle.vehicle.startUp(departureIndex, departureIndex == -1 ? (((NameColorDataBaseSchemaAccessorMixin)targetVehicle.vehicle).getData().getCurrentMillis()) : sidingDepartures.getLong(departureIndex));
+
+        final int departureIndexToUse = departureIndex;
+        context.getSource().sendSuccess(() -> TextHelper.literal("Deploying vehicle with departure index " + departureIndexToUse + " (Siding " + siding.getName() + ")...").formatted(TextFormatting.GREEN).data, false);
         return 1;
     }
 
@@ -154,24 +178,6 @@ public class TrainCommand {
         return 1;
     }
 
-    private static int ejectPassengers(CommandContext<CommandSourceStack> context) {
-//        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
-//
-//        ((TrainAccessorMixin)nearestTrain.train).getRidingEntities().clear();
-//        MtrUtil.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
-//        context.getSource().sendSuccess(Mappings.literalText("All passengers cleared from train!").withStyle(ChatFormatting.GREEN), false);
-        return 1;
-    }
-
-    private static int board(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-//        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
-//
-//        ((TrainAccessorMixin)nearestTrain.train).getRidingEntities().add(context.getSource().getPlayerOrException().getUUID());
-//        MtrUtil.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
-//        context.getSource().sendSuccess(Mappings.literalText("Train boarded!").withStyle(ChatFormatting.GREEN), false);
-        return 1;
-    }
-
     private static int clearNearestTrain(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         Main tsc = InitAccessorMixin.getMain();
         Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
@@ -185,43 +191,19 @@ public class TrainCommand {
         return 1;
     }
 
-    private static int skipDwell(CommandContext<CommandSourceStack> context) {
+    private static int skipDwell(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        Main tsc = InitAccessorMixin.getMain();
+        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
+        TargetVehicle targetVehicle = requireNearestVehicle(context);
+
 //        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
 //        ((TrainAccessorMixin)nearestTrain.train).setElapsedDwellTicks(nearestTrain.train.getTotalDwellTicks());
-//        MtrUtil.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
 //
 //        context.getSource().sendSuccess(Mappings.literalText("Dwell time skipped!").withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
-    private static int haltDwell(CommandContext<CommandSourceStack> context) {
-//        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
-//        boolean halted = TransitManager.getTrainState(nearestTrain.train.id, TrainState.HALT_DWELL);
-//        TransitManager.setTrainState(nearestTrain.train.id, TrainState.HALT_DWELL, !halted);
-//
-//        context.getSource().sendSuccess(Mappings.literalText("Dwell timer for the nearest train has been " + (!halted ? "paused" : "resumed")).withStyle(ChatFormatting.GREEN), false);
-        return 1;
-    }
-
-    private static int haltSpeed(CommandContext<CommandSourceStack> context) {
-//        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
-//        boolean halted = TransitManager.getTrainState(nearestTrain.train.id, TrainState.HALT_SPEED);
-//        TransitManager.setTrainState(nearestTrain.train.id, TrainState.HALT_SPEED, !halted);
-//
-//        context.getSource().sendSuccess(Mappings.literalText("The nearest train has " + (!halted ? "been brought to a halt" : "resumed it's operation")).withStyle(ChatFormatting.GREEN), false);
-        return 1;
-    }
-
-    private static int toggleCollision(CommandContext<CommandSourceStack> context) {
-//        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
-//        boolean skipCollision = TransitManager.getTrainState(nearestTrain.train.id, TrainState.SKIP_COLLISION);
-//        TransitManager.setTrainState(nearestTrain.train.id, TrainState.SKIP_COLLISION, !skipCollision);
-//
-//        context.getSource().sendSuccess(Mappings.literalText("Collision detection for the nearest train is now " + (!skipCollision ? "bypassed" : "reset to normal")).withStyle(ChatFormatting.GREEN), false);
-        return 1;
-    }
-
-    private static TargetVehicle requireNearestVehicle(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    public static TargetVehicle requireNearestVehicle(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer player = context.getSource().getPlayer();
         Main tsc = InitAccessorMixin.getMain();
         Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
@@ -234,7 +216,7 @@ public class TrainCommand {
         return targetVehicle;
     }
 
-    public static int getNearestVehicle(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    public static int printVehicleInfo(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         Main tsc = InitAccessorMixin.getMain();
         Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
         Vector targetPosition = Util.toVector(context.getSource().getPosition());

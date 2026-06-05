@@ -7,6 +7,7 @@
     "BlockPSDTopMixin",
     "InitAccessorMixin",
     "MainAccessorMixin",
+    "NameColorDataBaseSchemaAccessorMixin",
     "SidingAccessorMixin",
     "VehicleAccessorMixin",
     "VehicleExtraDataAccessorMixin",

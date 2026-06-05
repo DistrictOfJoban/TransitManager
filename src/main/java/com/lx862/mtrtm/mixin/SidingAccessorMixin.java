@@ -2,6 +2,7 @@ package com.lx862.mtrtm.mixin;
 
 import org.mtr.core.data.Siding;
 import org.mtr.core.data.Vehicle;
+import org.mtr.libraries.it.unimi.dsi.fastutil.longs.LongArrayList;
 import org.mtr.libraries.it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -11,4 +12,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface SidingAccessorMixin {
     @Accessor("vehicles")
     ObjectArraySet<Vehicle> getVehicles();
+
+    @Accessor("departures")
+    LongArrayList getDepartures();
 }
