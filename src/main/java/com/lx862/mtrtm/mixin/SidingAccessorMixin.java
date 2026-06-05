@@ -11,8 +11,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(value = Siding.class, remap = false)
 public interface SidingAccessorMixin {
     @Accessor("vehicles")
-    ObjectArraySet<Vehicle> getVehicles();
+    ObjectArraySet<Vehicle> mtrtm$getVehicles();
 
     @Accessor("departures")
-    LongArrayList getDepartures();
+    LongArrayList mtrtm$getDepartures();
 }

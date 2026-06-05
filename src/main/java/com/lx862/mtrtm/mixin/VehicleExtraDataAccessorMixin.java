@@ -10,5 +10,5 @@ import java.util.function.Predicate;
 @Mixin(VehicleExtraData.class)
 public interface VehicleExtraDataAccessorMixin {
     @Invoker("removeRidingEntitiesIf")
-    void removeVehicleRiderIf(Predicate<VehicleRidingEntity> predicate);
+    void mtrtm$removeRidingEntitiesIf(Predicate<VehicleRidingEntity> predicate);
 }

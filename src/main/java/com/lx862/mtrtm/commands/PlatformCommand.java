@@ -29,8 +29,8 @@ public class PlatformCommand {
                     ServerPlayer rawPlayer = context.getSource().getPlayerOrException();
                     ServerPlayerEntity player = new ServerPlayerEntity(rawPlayer);
 
-                    Main tsc = InitAccessorMixin.getMain();
-                    Simulator data = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
+                    Main tsc = InitAccessorMixin.mtrtm$getMain();
+                    Simulator data = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), context.getSource().getLevel());
 
                     BlockPos playerBlockPos = player.getBlockPos();
                     Position playerPos = new Position(playerBlockPos.getX(), playerBlockPos.getY(), playerBlockPos.getZ());

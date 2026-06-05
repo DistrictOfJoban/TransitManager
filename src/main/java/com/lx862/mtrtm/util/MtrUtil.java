@@ -105,15 +105,15 @@ public class MtrUtil {
         List<TargetVehicle> vehicles = new ArrayList<>();
 
         for(Siding siding : simulator.sidings) {
-            for(Vehicle train : ((SidingAccessorMixin)(Object)siding).getVehicles()) {
+            for(Vehicle train : ((SidingAccessorMixin)(Object)siding).mtrtm$getVehicles()) {
                 var vehicleCarsAndPos = train.getVehicleCarsAndPositions();
                 final Vector[] positions = new Vector[vehicleCarsAndPos.size()];
 
-                double railProgress = ((VehicleSchemaAccessorMixin)train).getRailProgress();
+                double railProgress = ((VehicleSchemaAccessorMixin)train).mtrtm$getRailProgress();
                 for(int i = 0; i < positions.length; i++) {
                     double trainLength = vehicleCarsAndPos.get(i).left().getLength();
                     double carMidRailProgress = railProgress - (trainLength / 2);
-                    positions[i] = ((VehicleAccessorMixin)train).getPositionAt(carMidRailProgress, new DoubleArrayList());
+                    positions[i] = ((VehicleAccessorMixin)train).mtrtm$getPositionAt(carMidRailProgress, new DoubleArrayList());
                     railProgress -= trainLength;
                 }
 
@@ -163,15 +163,15 @@ public class MtrUtil {
      * This affects the online System Map and may cause issues like a "ghost" player blocking the train doors, even though it had already left.
      * This puts a check on server-side to forcibly remove the riding clients. */
     public static void removeVehicleRiders(ServerPlayer player) {
-        Main tsc = InitAccessorMixin.getMain();
+        Main tsc = InitAccessorMixin.mtrtm$getMain();
         UUID playerUuid = player.getUUID();
-        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), player.level());
+        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), player.level());
 
         simulator.run(() -> {
             for(Siding siding : simulator.sidings) {
                 siding.iterateVehiclesAndRidingEntities((vehicleExtraData, vehicleRidingEntity) -> {
                     if(vehicleRidingEntity.uuid.equals(playerUuid)) {
-                        ((VehicleExtraDataAccessorMixin) vehicleExtraData).removeVehicleRiderIf(rider -> rider.uuid.equals(playerUuid));
+                        ((VehicleExtraDataAccessorMixin) vehicleExtraData).mtrtm$removeRidingEntitiesIf(rider -> rider.uuid.equals(playerUuid));
                         simulator.stopRiding(playerUuid);
                         TransitManager.LOGGER.info("[TransitManager] Cleared {} from riding passengers as disconnected.", player.getGameProfile().getName());
                     }

@@ -34,8 +34,8 @@ public class WarpCommands {
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.argument("name", StringArgumentType.greedyString())
                         .suggests((context, suggestionsBuilder) -> {
-                                    Main tsc = InitAccessorMixin.getMain();
-                                    Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
+                                    Main tsc = InitAccessorMixin.mtrtm$getMain();
+                                    Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), context.getSource().getLevel());
                                     String target = suggestionsBuilder.getRemainingLowerCase();
 
                                     Util.formulateMatchingString(target, getData.apply(simulator).stream().map(NameColorDataBase::getName).toList())
@@ -48,8 +48,8 @@ public class WarpCommands {
                             ServerPlayer player = context.getSource().getPlayerOrException();
                             Level world = context.getSource().getLevel();
                             String name = StringArgumentType.getString(context, "name");
-                            Main tsc = InitAccessorMixin.getMain();
-                            Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
+                            Main tsc = InitAccessorMixin.mtrtm$getMain();
+                            Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), context.getSource().getLevel());
 
                             AreaBase<?, ?> area = MtrUtil.findArea(name, getData.apply(simulator)).stream().findAny().orElse(null);
 

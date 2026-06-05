@@ -20,8 +20,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class DepartureIndexHelper {
     public static CompletableFuture<Suggestions> suggestDepartureIndex(CommandContext<CommandSourceStack> context, SuggestionsBuilder suggestionsBuilder) {
-        Main tsc = InitAccessorMixin.getMain();
-        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
+        Main tsc = InitAccessorMixin.mtrtm$getMain();
+        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), context.getSource().getLevel());
         String target = suggestionsBuilder.getRemainingLowerCase();
         TargetVehicle targetVehicle;
         try {
@@ -33,12 +33,12 @@ public class DepartureIndexHelper {
         Siding siding = simulator.sidingIdMap.get(sidingId);
         if(siding == null) return suggestionsBuilder.buildFuture();
 
-        LongArrayList sidingDepartures = ((SidingAccessorMixin)(Object)siding).getDepartures();
+        LongArrayList sidingDepartures = ((SidingAccessorMixin)(Object)siding).mtrtm$getDepartures();
         ObjectArrayList<String> suggestedDepartures = new ObjectArrayList<>();
         LongArrayList usedDepartureIndex = new LongArrayList();
         long tzOffset = System.currentTimeMillis() / 86400000L * 86400000L;
 
-        ((SidingAccessorMixin)(Object)siding).getVehicles().forEach(e -> {
+        ((SidingAccessorMixin)(Object)siding).mtrtm$getVehicles().forEach(e -> {
             usedDepartureIndex.add(e.getDepartureIndex());
         });
 

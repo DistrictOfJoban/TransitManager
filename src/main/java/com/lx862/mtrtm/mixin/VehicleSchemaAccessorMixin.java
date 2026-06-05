@@ -7,11 +7,14 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(value = VehicleSchema.class, remap = false)
 public interface VehicleSchemaAccessorMixin {
     @Accessor("railProgress")
-    double getRailProgress();
+    double mtrtm$getRailProgress();
 
     @Accessor("speed")
-    double getSpeed();
+    double mtrtm$getSpeed();
 
     @Accessor("elapsedDwellTime")
-    long getElapsedDwellTime();
+    long mtrtm$getElapsedDwellTime();
+
+    @Accessor("elapsedDwellTime")
+    void mtrtm$setElapsedDwellTime(long newElapsedDwellTime);
 }

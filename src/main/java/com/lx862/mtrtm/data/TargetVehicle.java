@@ -33,20 +33,20 @@ public class TargetVehicle {
         this.vehicle = vehicle;
         this.carsAndPos = this.vehicle.getVehicleCarsAndPositions();
         this.positions = positions;
-        this.manualCooldownMs = ((VehicleAccessorMixin)vehicle).getManualCooldown();
+        this.manualCooldownMs = ((VehicleAccessorMixin)vehicle).mtrtm$getManualCooldown();
         this.manualToAutomaticTime = -1;
         this.isManual = vehicle.vehicleExtraData.getIsManualAllowed();
         this.isCurrentlyManual = vehicle.vehicleExtraData.getIsCurrentlyManual();
         this.accelerationSign = vehicle.vehicleExtraData.getPowerLevel();
-        this.speedKmh = ((VehicleSchemaAccessorMixin)vehicle).getSpeed() * 1000 * 3.6;
+        this.speedKmh = ((VehicleSchemaAccessorMixin)vehicle).mtrtm$getSpeed() * 1000 * 3.6;
         this.totalDwellTime = getTotalDwellTime();
-        this.elapsedDwellTime = ((VehicleSchemaAccessorMixin)vehicle).getElapsedDwellTime();
+        this.elapsedDwellTime = ((VehicleSchemaAccessorMixin)vehicle).mtrtm$getElapsedDwellTime();
         this.ridingEntities = new ArrayList<>();
         vehicle.vehicleExtraData.iterateRidingEntities(vehicleRidingEntity -> ridingEntities.add(vehicleRidingEntity));
     }
 
     private long getTotalDwellTime() {
-        int railIndex = Utilities.getIndexFromConditionalList(vehicle.vehicleExtraData.immutablePath, ((VehicleSchemaAccessorMixin)vehicle).getRailProgress() - 1F);
+        int railIndex = Utilities.getIndexFromConditionalList(vehicle.vehicleExtraData.immutablePath, ((VehicleSchemaAccessorMixin)vehicle).mtrtm$getRailProgress() - 1F);
         if(railIndex < vehicle.vehicleExtraData.immutablePath.size()) {
             PathData path = vehicle.vehicleExtraData.immutablePath.get(railIndex);
             if(path != null) {

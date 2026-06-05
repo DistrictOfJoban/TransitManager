@@ -9,5 +9,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(value = Main.class, remap = false)
 public interface MainAccessorMixin {
     @Accessor("simulators")
-    ObjectImmutableList<Simulator> getSimulators();
+    ObjectImmutableList<Simulator> mtrtm$getSimulators();
 }

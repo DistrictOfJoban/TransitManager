@@ -10,11 +10,11 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(value = Vehicle.class, remap = false)
 public interface VehicleAccessorMixin {
     @Invoker("getPosition")
-    Vector getPositionAt(double value, DoubleArrayList objectArrayList);
+    Vector mtrtm$getPositionAt(double value, DoubleArrayList objectArrayList);
 
     @Accessor("manualCooldown")
-    long getManualCooldown();
+    long mtrtm$getManualCooldown();
 
     @Accessor("deviation")
-    long getDeviation();
+    long mtrtm$getDeviation();
 }

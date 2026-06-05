@@ -10,7 +10,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import org.mtr.core.generated.data.NameColorDataBaseSchema;
 import org.mtr.libraries.it.unimi.dsi.fastutil.longs.LongArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -86,18 +85,18 @@ public class TrainCommand {
             }
         }
 
-        Main tsc = InitAccessorMixin.getMain();
-        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
+        Main tsc = InitAccessorMixin.mtrtm$getMain();
+        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), context.getSource().getLevel());
         TargetVehicle targetVehicle = requireNearestVehicle(context);
         long sidingId = targetVehicle.vehicle.vehicleExtraData.getSidingId();
         Siding siding = simulator.sidingIdMap.get(sidingId);
         if(siding == null) return 0;
-        LongArrayList sidingDepartures = ((SidingAccessorMixin)(Object)siding).getDepartures();
+        LongArrayList sidingDepartures = ((SidingAccessorMixin)(Object)siding).mtrtm$getDepartures();
 
 
         if(departureIndex != -1) {
             LongArrayList usedDepartureIndex = new LongArrayList();
-            ((SidingAccessorMixin)(Object)siding).getVehicles().forEach(e -> {
+            ((SidingAccessorMixin)(Object)siding).mtrtm$getVehicles().forEach(e -> {
                 usedDepartureIndex.add(e.getDepartureIndex());
             });
 
@@ -112,7 +111,7 @@ public class TrainCommand {
             return 0;
         }
 
-        targetVehicle.vehicle.startUp(departureIndex, departureIndex == -1 ? (((NameColorDataBaseSchemaAccessorMixin)targetVehicle.vehicle).getData().getCurrentMillis()) : sidingDepartures.getLong(departureIndex));
+        targetVehicle.vehicle.startUp(departureIndex, departureIndex == -1 ? (((NameColorDataBaseSchemaAccessorMixin)targetVehicle.vehicle).mtrtm$getData().getCurrentMillis()) : sidingDepartures.getLong(departureIndex));
 
         final int departureIndexToUse = departureIndex;
         context.getSource().sendSuccess(() -> TextHelper.literal("Deploying vehicle with departure index " + departureIndexToUse + " (Siding " + siding.getName() + ")...").formatted(TextFormatting.GREEN).data, false);
@@ -179,21 +178,21 @@ public class TrainCommand {
     }
 
     private static int clearNearestTrain(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        Main tsc = InitAccessorMixin.getMain();
-        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
+        Main tsc = InitAccessorMixin.mtrtm$getMain();
+        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), context.getSource().getLevel());
         TargetVehicle targetVehicle = requireNearestVehicle(context);
 
         long sidingId = targetVehicle.vehicle.vehicleExtraData.getSidingId();
         Siding trainSiding = simulator.sidingIdMap.get(sidingId);
 
-        ((SidingAccessorMixin)(Object)trainSiding).getVehicles().removeIf(vehicle -> vehicle.getId() == targetVehicle.vehicle.getId());
+        ((SidingAccessorMixin)(Object)trainSiding).mtrtm$getVehicles().removeIf(vehicle -> vehicle.getId() == targetVehicle.vehicle.getId());
         context.getSource().sendSuccess(() -> TextHelper.literal("Train cleared!").formatted(TextFormatting.GREEN).data, false);
         return 1;
     }
 
     private static int skipDwell(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        Main tsc = InitAccessorMixin.getMain();
-        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
+        Main tsc = InitAccessorMixin.mtrtm$getMain();
+        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), context.getSource().getLevel());
         TargetVehicle targetVehicle = requireNearestVehicle(context);
 
 //        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
@@ -205,8 +204,8 @@ public class TrainCommand {
 
     public static TargetVehicle requireNearestVehicle(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer player = context.getSource().getPlayer();
-        Main tsc = InitAccessorMixin.getMain();
-        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
+        Main tsc = InitAccessorMixin.mtrtm$getMain();
+        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), context.getSource().getLevel());
 
         TargetVehicle targetVehicle = MtrUtil.getNearestTrain(player, Util.toVector(context.getSource().getPosition()), simulator);
 
@@ -217,8 +216,8 @@ public class TrainCommand {
     }
 
     public static int printVehicleInfo(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        Main tsc = InitAccessorMixin.getMain();
-        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
+        Main tsc = InitAccessorMixin.mtrtm$getMain();
+        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), context.getSource().getLevel());
         Vector targetPosition = Util.toVector(context.getSource().getPosition());
         TargetVehicle targetVehicle = requireNearestVehicle(context);
 
@@ -318,7 +317,7 @@ public class TrainCommand {
     }
 
     private static MutableText getDeviationText(Vehicle vehicle) {
-        long deviation = ((VehicleAccessorMixin)vehicle).getDeviation();
+        long deviation = ((VehicleAccessorMixin)vehicle).mtrtm$getDeviation();
         if(deviation > 0) {
             return TextHelper.literal("+" + Util.getReadableTimeMs(Math.abs(deviation))).formatted(TextFormatting.RED);
         } else if(deviation < 0) {

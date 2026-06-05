@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(value = Init.class, remap = false)
 public interface InitAccessorMixin {
     @Accessor("main")
-    static Main getMain() {
+    static Main mtrtm$getMain() {
         throw new AssertionError();
     }
 }

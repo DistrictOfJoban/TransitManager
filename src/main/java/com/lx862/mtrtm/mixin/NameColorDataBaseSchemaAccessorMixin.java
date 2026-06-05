@@ -7,6 +7,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(NameColorDataBaseSchema.class)
 public interface NameColorDataBaseSchemaAccessorMixin {
-    @Accessor
-    Data getData();
+    @Accessor("data")
+    Data mtrtm$getData();
 }
