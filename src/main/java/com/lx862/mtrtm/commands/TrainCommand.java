@@ -3,6 +3,7 @@ package com.lx862.mtrtm.commands;
 import com.lx862.mtrtm.data.TargetVehicle;
 import com.lx862.mtrtm.mixin.InitAccessorMixin;
 import com.lx862.mtrtm.mixin.MainAccessorMixin;
+import com.lx862.mtrtm.mixin.SidingAccessorMixin;
 import com.lx862.mtrtm.mixin.VehicleAccessorMixin;
 import com.lx862.mtrtm.util.MtrUtil;
 import com.lx862.mtrtm.util.Util;
@@ -38,9 +39,9 @@ public class TrainCommand {
 //                .then(Commands.literal("ejectAllPassengers")
 //                        .executes(context -> ejectPassengers(context))
 //                )
-//                .then(Commands.literal("clear")
-//                        .executes(context -> clearNearestTrain(context))
-//                )
+                .then(Commands.literal("clear")
+                        .executes(context -> clearNearestTrain(context))
+                )
 //                .then(Commands.literal("deploy")
 //                        .executes(context -> deploy(context))
 //                )
@@ -171,15 +172,16 @@ public class TrainCommand {
         return 1;
     }
 
-    private static int clearNearestTrain(CommandContext<CommandSourceStack> context) {
-//        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
-//        RailwayData railwayData = RailwayData.getInstance(context.getSource().getLevel());
-//
-//        long sidingId = nearestTrain.train.sidingId;
-//        Siding trainSiding = railwayData.dataCache.sidingIdMap.get(sidingId);
-//
-//        ((SidingAccessorMixin)trainSiding).getTrains().removeIf(train -> train.id == nearestTrain.train.id);
-//        context.getSource().sendSuccess(Mappings.literalText("Siding cleared!").withStyle(ChatFormatting.GREEN), false);
+    private static int clearNearestTrain(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        Main tsc = InitAccessorMixin.getMain();
+        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), context.getSource().getLevel());
+        TargetVehicle targetVehicle = requireNearestVehicle(context);
+
+        long sidingId = targetVehicle.vehicle.vehicleExtraData.getSidingId();
+        Siding trainSiding = simulator.sidingIdMap.get(sidingId);
+
+        ((SidingAccessorMixin)(Object)trainSiding).getVehicles().removeIf(vehicle -> vehicle.getId() == targetVehicle.vehicle.getId());
+        context.getSource().sendSuccess(() -> TextHelper.literal("Train cleared!").formatted(TextFormatting.GREEN).data, false);
         return 1;
     }
 
