@@ -61,6 +61,7 @@ public class PlatformCommand {
                     player.sendMessage(Text.cast(TextHelper.setStyle(TextHelper.literal("Transport Type: " + platform.getTransportMode().toString().toLowerCase()), Style.getEmptyMapped().withColor(TextFormatting.GOLD))), false);
                     player.sendMessage(Text.cast(TextHelper.setStyle(TextHelper.literal("Route List: (Hover)"), new Style(Style.getEmptyMapped().data.withColor(ChatFormatting.GOLD).withUnderlined(true).withHoverEvent(hoverEvent)))), false);
                     return 1;
-                }));
+                })
+        );
     }
 }

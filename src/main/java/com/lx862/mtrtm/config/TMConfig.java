@@ -8,7 +8,7 @@ import net.fabricmc.loader.api.FabricLoader;
 
 @DisplayName("TransitManager Config")
 public class TMConfig extends WrappedConfig {
-    public static TMConfig INSTANCE = createToml(FabricLoader.getInstance().getConfigDir(), "transitmanager", "server", TMConfig.class);
+    public static TMConfig INSTANCE = createToml(FabricLoader.getInstance().getConfigDir(), "mtrate", "server", TMConfig.class);
 
     @Comment("Operator level required for the PSD Top to be sheared.")
     @Comment("Useful for exhibition-alike server to prevent visitors griefing with shears.")
