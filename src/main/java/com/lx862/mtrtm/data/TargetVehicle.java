@@ -42,7 +42,7 @@ public class TargetVehicle {
         this.totalDwellTime = getTotalDwellTime();
         this.elapsedDwellTime = ((VehicleSchemaAccessorMixin)vehicle).mtrtm$getElapsedDwellTime();
         this.ridingEntities = new ArrayList<>();
-        vehicle.vehicleExtraData.iterateRidingEntities(vehicleRidingEntity -> ridingEntities.add(vehicleRidingEntity));
+        vehicle.vehicleExtraData.iterateRidingEntities(ridingEntities::add);
     }
 
     private long getTotalDwellTime() {

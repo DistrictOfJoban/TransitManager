@@ -42,9 +42,9 @@ public class TrainCommand {
                             .executes(context -> deploy(context))
                         )
                 )
-//                .then(Commands.literal("skipDwell")
-//                        .executes(context -> skipDwell(context))
-//                )
+                .then(Commands.literal("skipDwell")
+                        .executes(context -> skipDwell(context))
+                )
 //                .then(Commands.literal("jump")
 //                        .then(Commands.literal("siding")
 //                                .executes(context -> jump(context, true, false, false, false, true))
@@ -192,13 +192,10 @@ public class TrainCommand {
 
     private static int skipDwell(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         Main tsc = InitAccessorMixin.mtrtm$getMain();
-        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), context.getSource().getLevel());
         TargetVehicle targetVehicle = requireNearestVehicle(context);
 
-//        ExposedTrainData nearestTrain = getNearestTrainOrError(context);
-//        ((TrainAccessorMixin)nearestTrain.train).setElapsedDwellTicks(nearestTrain.train.getTotalDwellTicks());
-//
-//        context.getSource().sendSuccess(Mappings.literalText("Dwell time skipped!").withStyle(ChatFormatting.GREEN), false);
+        ((VehicleSchemaAccessorMixin)targetVehicle.vehicle).mtrtm$setElapsedDwellTime(targetVehicle.totalDwellTime);
+        context.getSource().sendSuccess(() -> TextHelper.literal("Dwell time skipped!").formatted(TextFormatting.GREEN).data, false);
         return 1;
     }
 
