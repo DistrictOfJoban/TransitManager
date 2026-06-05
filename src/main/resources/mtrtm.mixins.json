@@ -9,6 +9,7 @@
     "MainAccessorMixin",
     "SidingAccessorMixin",
     "VehicleAccessorMixin",
+    "VehicleExtraDataAccessorMixin",
     "VehicleSchemaAccessorMixin"
   ],
   "client": [

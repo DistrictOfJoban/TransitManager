@@ -1,13 +1,13 @@
 package com.lx862.mtrtm.util;
 
+import com.lx862.mtrtm.TransitManager;
 import com.lx862.mtrtm.data.TargetVehicle;
-import com.lx862.mtrtm.mixin.SidingAccessorMixin;
-import com.lx862.mtrtm.mixin.VehicleAccessorMixin;
-import com.lx862.mtrtm.mixin.VehicleSchemaAccessorMixin;
+import com.lx862.mtrtm.mixin.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import org.mtr.core.Main;
 import org.mtr.core.data.*;
 import org.mtr.core.simulation.Simulator;
 import org.mtr.core.tool.Vector;
@@ -186,4 +186,27 @@ public class MtrUtil {
         return closestVehicle;
     }
 
+    /** Disconnecting client cannot send a packet by themselves to dismount from the train, causing the server to still think the player is mounted.
+     * This affects the online System Map and may cause issues like a "ghost" player blocking the train doors, even though it had already left.
+     * This puts a check on server-side to forcibly remove the riding clients. */
+    public static void removeVehicleRiders(ServerPlayer player) {
+        Main tsc = InitAccessorMixin.getMain();
+        UUID playerUuid = player.getUUID();
+        Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).getSimulators(), player.level());
+
+        simulator.run(() -> {
+            for(Siding siding : simulator.sidings) {
+                siding.iterateVehiclesAndRidingEntities((vehicleExtraData, vehicleRidingEntity) -> {
+                    if(vehicleRidingEntity.uuid.equals(playerUuid)) {
+                        ((VehicleExtraDataAccessorMixin) vehicleExtraData).removeVehicleRiderIf(rider -> rider.uuid.equals(playerUuid));
+                        simulator.stopRiding(playerUuid);
+                        TransitManager.LOGGER.info("[TransitManager] Cleared {} from riding passengers as disconnected.", player.getGameProfile().getName());
+                    }
+                });
+            }
+            // Server will only re-validate client's existence if there's some form of update nearby
+            // This may still cause a ghost leftover in System Map, remove that as well.
+            simulator.clients.removeIf(client -> client.uuid.equals(playerUuid));
+        });
+    }
 }
