@@ -9,6 +9,7 @@
     "MainAccessorMixin",
     "NameColorDataBaseSchemaAccessorMixin",
     "SidingAccessorMixin",
+    "SimulatorMixin",
     "VehicleAccessorMixin",
     "VehicleExtraDataAccessorMixin",
     "VehicleSchemaAccessorMixin"
