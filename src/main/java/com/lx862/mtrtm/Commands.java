@@ -8,5 +8,6 @@ public class Commands {
         TrainCommand.register(dispatcher);
         PlatformCommand.register(dispatcher);
         WarpCommands.register(dispatcher);
+        TscCommand.register(dispatcher);
     }
 }
