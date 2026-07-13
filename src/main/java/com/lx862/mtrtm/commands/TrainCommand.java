@@ -23,6 +23,8 @@ import org.mtr.core.simulation.Simulator;
 import org.mtr.core.tool.Vector;
 import org.mtr.mod.data.IGui;
 
+import java.util.List;
+
 public class TrainCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -264,19 +266,29 @@ public class TrainCommand {
             MutableComponent runningModeText = Component.literal(targetVehicle.isManual ? targetVehicle.isCurrentlyManual ? "Manual" : "ATO (Manual Available)" : "ATO").withStyle(ChatFormatting.GREEN);
             String title = targetVehicle.vehicle.getHexId() + " (" + targetVehicle.positions.length + "-cars)";
 
+            int doorBlockerCount = 0;
+
             StringBuilder ridingEntitiesStr = new StringBuilder();
+            StringBuilder ridingEntitiesDoorBlockerStr = new StringBuilder();
             for(int i = 0; i < targetVehicle.ridingEntities.size(); i++) {
                 VehicleRidingEntity vehicleRidingEntity = targetVehicle.ridingEntities.get(i);
                 ServerPlayer ridingPlayer = context.getSource().getServer().getPlayerList().getPlayer(vehicleRidingEntity.uuid);
                 if(ridingPlayer != null) {
                     ridingEntitiesStr.append(String.format("%s (Car %d)", ridingPlayer.getGameProfile().getName(), vehicleRidingEntity.getRidingCar()+1));
-                    if(i != targetVehicle.ridingEntities.size()-1) ridingEntitiesStr.append("\n");
+                    if(i != targetVehicle.ridingEntities.size()-1) {
+                        ridingEntitiesStr.append("\n");
+                    }
+
+                    if(vehicleRidingEntity.getDoorOverride()) {
+                        ridingEntitiesDoorBlockerStr.append(String.format("%s (Car %d)", ridingPlayer.getGameProfile().getName(), vehicleRidingEntity.getRidingCar()+1)).append("\n");
+                        doorBlockerCount++;
+                    }
                 }
             }
 
             context.getSource().sendSuccess(() -> Component.literal("===== " + title + " =====").withStyle(ChatFormatting.GREEN), false);
-            sendKeyValueFeedback(context, Component.literal("Rail Progress: "), Component.literal(String.format("%.1f", currentRailProgress) + "m"));
-            sendKeyValueFeedback(context, Component.literal("Relative distance: "), Component.literal(Math.round(Util.getManhattenDistance(targetVehicle.positions[targetVehicle.closestCar], targetPosition)) + "m"));
+            sendKeyValueFeedback(context, Component.literal("Rail Progress: "), Component.literal(String.format("%.1f", currentRailProgress) + "m").withStyle(ChatFormatting.GREEN));
+            sendKeyValueFeedback(context, Component.literal("Relative distance: "), Component.literal(Math.round(Util.getManhattenDistance(targetVehicle.positions[targetVehicle.closestCar], targetPosition)) + "m").withStyle(ChatFormatting.GREEN));
             sendKeyValueFeedback(context, Component.literal("Mode: "), runningModeText);
             if(targetVehicle.isManual && targetVehicle.isCurrentlyManual) {
                 sendKeyValueFeedback(context, Component.literal("Switching to ATO in: "), manualTimeRemainingText);
@@ -294,7 +306,12 @@ public class TrainCommand {
 
             if(!targetVehicle.ridingEntities.isEmpty()) {
                 HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(ridingEntitiesStr.toString()).withStyle(ChatFormatting.GREEN));
-                context.getSource().sendSuccess(() -> Component.literal("Riding players: (Hover Here)").setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD).withHoverEvent(hoverEvent)), false);
+                context.getSource().sendSuccess(() -> Component.literal(String.format("Riding players (%d): (Hover Here)", targetVehicle.ridingEntities.size())).setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD).withHoverEvent(hoverEvent)), false);
+            }
+
+            if(!ridingEntitiesDoorBlockerStr.isEmpty()) {
+                HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(ridingEntitiesDoorBlockerStr.toString()).withStyle(ChatFormatting.GREEN));
+                context.getSource().sendSuccess(() -> Component.literal(String.format("Door blockers (%d): (Hover Here)", targetVehicle.ridingEntities.size())).setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW).withHoverEvent(hoverEvent)), false);
             }
             return 1;
         } catch (Exception e) {
