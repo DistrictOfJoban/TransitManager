@@ -9,11 +9,20 @@ public interface VehicleSchemaAccessorMixin {
     @Accessor("railProgress")
     double mtrtm$getRailProgress();
 
+    @Accessor("nextStoppingIndexAto")
+    long mtrtm$getNextStoppingIndexAto();
+
     @Accessor("speed")
     double mtrtm$getSpeed();
 
     @Accessor("elapsedDwellTime")
     long mtrtm$getElapsedDwellTime();
+
+    @Accessor("nextStoppingIndexAto")
+    void mtrtm$setNextStoppingIndexAto(long newStoppingIndexAto);
+
+    @Accessor("railProgress")
+    void mtrtm$setRailProgress(double newRailProgress);
 
     @Accessor("elapsedDwellTime")
     void mtrtm$setElapsedDwellTime(long newElapsedDwellTime);

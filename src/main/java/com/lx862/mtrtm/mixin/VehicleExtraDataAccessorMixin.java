@@ -3,6 +3,7 @@ package com.lx862.mtrtm.mixin;
 import org.mtr.core.data.VehicleExtraData;
 import org.mtr.core.data.VehicleRidingEntity;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.function.Predicate;
@@ -11,4 +12,7 @@ import java.util.function.Predicate;
 public interface VehicleExtraDataAccessorMixin {
     @Invoker("removeRidingEntitiesIf")
     void mtrtm$removeRidingEntitiesIf(Predicate<VehicleRidingEntity> predicate);
+
+    @Accessor("hasRidingEntityUpdate")
+    void mtrtm$forceUpdate(boolean bl);
 }
