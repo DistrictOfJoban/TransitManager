@@ -6,6 +6,7 @@ import com.lx862.mtrtm.util.DepartureIndexHelper;
 import com.lx862.mtrtm.util.MtrUtil;
 import com.lx862.mtrtm.util.Util;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -39,8 +40,18 @@ public class TrainCommand {
                             .executes(TrainCommand::deploy)
                         )
                 )
-                .then(Commands.literal("skipDwell")
-                        .executes(TrainCommand::skipDwell)
+                .then(Commands.literal("dwell")
+                        .then(Commands.literal("reset")
+                                .executes(TrainCommand::resetDwell)
+                        )
+                        .then(Commands.literal("skip")
+                            .executes(TrainCommand::skipDwell)
+                        )
+                        .then(Commands.literal("set")
+                                .then(Commands.argument("milliseconds", LongArgumentType.longArg(0))
+                                    .executes(TrainCommand::setElapsedDwell)
+                                )
+                        )
                 )
                 .then(Commands.literal("jump")
                         .then(Commands.literal("siding")
@@ -193,6 +204,23 @@ public class TrainCommand {
 
         ((VehicleSchemaAccessorMixin)targetVehicle.vehicle).mtrtm$setElapsedDwellTime(targetVehicle.totalDwellTime);
         context.getSource().sendSuccess(() -> Component.literal("Dwell time skipped!").withStyle(ChatFormatting.GREEN), false);
+        return 1;
+    }
+
+    private static int resetDwell(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        TargetVehicle targetVehicle = requireNearestVehicle(context);
+
+        ((VehicleSchemaAccessorMixin)targetVehicle.vehicle).mtrtm$setElapsedDwellTime(0);
+        context.getSource().sendSuccess(() -> Component.literal("Dwell time reset! " + Util.getReadableTimeMs(targetVehicle.totalDwellTime) + " left.").withStyle(ChatFormatting.GREEN), false);
+        return 1;
+    }
+
+    private static int setElapsedDwell(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        TargetVehicle targetVehicle = requireNearestVehicle(context);
+        long dwellTime = LongArgumentType.getLong(context, "milliseconds");
+
+        ((VehicleSchemaAccessorMixin)targetVehicle.vehicle).mtrtm$setElapsedDwellTime(dwellTime);
+        context.getSource().sendSuccess(() -> Component.literal("Dwell time set to " + dwellTime + "ms! " + Util.getReadableTimeMs(targetVehicle.totalDwellTime - dwellTime) + " left.").withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
