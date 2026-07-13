@@ -1,6 +1,11 @@
 package com.lx862.mtrtm.util;
 
+import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.phys.Vec3;
 import org.mtr.core.tool.Vector;
 
@@ -31,7 +36,9 @@ public class Util {
         double hr = (seconds / 60.0 / 60.0) % 24;
         double day = seconds / 60.0 / 60.0 / 24.0;
 
-        if(seconds < 60) {
+        if(seconds < 1) {
+            return ms + "ms";
+        } else if(seconds < 60) {
             return (int)Math.round(seconds) + "s";
         } else if(seconds < (60 * 60)) {
             return String.format("%dm %ds", (int)min, (int)sec);
@@ -44,5 +51,9 @@ public class Util {
 
     public static Vector toVector(Vec3 vec3) {
         return new Vector(vec3.x(), vec3.y(), vec3.z());
+    }
+
+    public static void sendKeyValueFeedback(CommandContext<CommandSourceStack> context, MutableComponent key, MutableComponent value) {
+        context.getSource().sendSuccess(() -> key.withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD)).append(value), false);
     }
 }

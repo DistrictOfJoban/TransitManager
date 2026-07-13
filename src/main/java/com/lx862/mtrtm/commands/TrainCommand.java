@@ -24,8 +24,6 @@ import org.mtr.core.simulation.Simulator;
 import org.mtr.core.tool.Vector;
 import org.mtr.mod.data.IGui;
 
-import java.util.List;
-
 public class TrainCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -315,21 +313,21 @@ public class TrainCommand {
             }
 
             context.getSource().sendSuccess(() -> Component.literal("===== " + title + " =====").withStyle(ChatFormatting.GREEN), false);
-            sendKeyValueFeedback(context, Component.literal("Rail Progress: "), Component.literal(String.format("%.1f", currentRailProgress) + "m").withStyle(ChatFormatting.GREEN));
-            sendKeyValueFeedback(context, Component.literal("Relative distance: "), Component.literal(Math.round(Util.getManhattenDistance(targetVehicle.positions[targetVehicle.closestCar], targetPosition)) + "m").withStyle(ChatFormatting.GREEN));
-            sendKeyValueFeedback(context, Component.literal("Mode: "), runningModeText);
+            Util.sendKeyValueFeedback(context, Component.literal("Rail Progress: "), Component.literal(String.format("%.1f", currentRailProgress) + "m").withStyle(ChatFormatting.GREEN));
+            Util.sendKeyValueFeedback(context, Component.literal("Relative distance: "), Component.literal(Math.round(Util.getManhattenDistance(targetVehicle.positions[targetVehicle.closestCar], targetPosition)) + "m").withStyle(ChatFormatting.GREEN));
+            Util.sendKeyValueFeedback(context, Component.literal("Mode: "), runningModeText);
             if(targetVehicle.isManual && targetVehicle.isCurrentlyManual) {
-                sendKeyValueFeedback(context, Component.literal("Switching to ATO in: "), manualTimeRemainingText);
+                Util.sendKeyValueFeedback(context, Component.literal("Switching to ATO in: "), manualTimeRemainingText);
             }
-            sendKeyValueFeedback(context, Component.literal("Depot/Siding: "), teleportToSavedRailText(depotNameText, siding));
-            sendKeyValueFeedback(context, Component.literal("Running Route: "), routeNameText);
-            sendKeyValueFeedback(context, Component.literal("Schedule Deviation: "), getDeviationText(targetVehicle.vehicle));
+            Util.sendKeyValueFeedback(context, Component.literal("Depot/Siding: "), teleportToSavedRailText(depotNameText, siding));
+            Util.sendKeyValueFeedback(context, Component.literal("Running Route: "), routeNameText);
+            Util.sendKeyValueFeedback(context, Component.literal("Schedule Deviation: "), getDeviationText(targetVehicle.vehicle));
             if(targetVehicle.speedKmh == 0 && targetVehicle.totalDwellTime > 0) {
-                sendKeyValueFeedback(context, Component.literal("Dwell left: "), dwellText);
+                Util.sendKeyValueFeedback(context, Component.literal("Dwell left: "), dwellText);
             }
 
             if(destinationText != null) {
-                sendKeyValueFeedback(context, Component.literal("Destination: "), teleportToSavedRailText(destinationText, lastRoutePlatform));
+                Util.sendKeyValueFeedback(context, Component.literal("Destination: "), teleportToSavedRailText(destinationText, lastRoutePlatform));
             }
 
             if(!targetVehicle.ridingEntities.isEmpty()) {
@@ -346,10 +344,6 @@ public class TrainCommand {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-    }
-
-    private static void sendKeyValueFeedback(CommandContext<CommandSourceStack> context, MutableComponent key, MutableComponent value) {
-        context.getSource().sendSuccess(() -> key.withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD)).append(value), false);
     }
 
     private static MutableComponent teleportToSavedRailText(MutableComponent originalText, SavedRailBase<?, ?> savedRail) {
