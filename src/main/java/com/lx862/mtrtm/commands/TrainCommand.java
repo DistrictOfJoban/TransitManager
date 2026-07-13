@@ -213,6 +213,7 @@ public class TrainCommand {
             Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), context.getSource().getLevel());
             Vector targetPosition = Util.toVector(context.getSource().getPosition());
             TargetVehicle targetVehicle = requireNearestVehicle(context);
+            double currentRailProgress = ((VehicleSchemaAccessorMixin)targetVehicle.vehicle).mtrtm$getRailProgress();
 
             Siding siding = simulator.sidings.stream().filter(sdg -> sdg.getId() == targetVehicle.vehicle.vehicleExtraData.getSidingId()).findFirst().orElse(null);
             if(siding == null) {
@@ -274,7 +275,8 @@ public class TrainCommand {
             }
 
             context.getSource().sendSuccess(() -> Component.literal("===== " + title + " =====").withStyle(ChatFormatting.GREEN), false);
-            sendKeyValueFeedback(context, Component.literal("Distance: "), Component.literal(Math.round(Util.getManhattenDistance(targetVehicle.positions[targetVehicle.closestCar], targetPosition)) + "m"));
+            sendKeyValueFeedback(context, Component.literal("Rail Progress: "), Component.literal(String.format("%.1f", currentRailProgress) + "m"));
+            sendKeyValueFeedback(context, Component.literal("Relative distance: "), Component.literal(Math.round(Util.getManhattenDistance(targetVehicle.positions[targetVehicle.closestCar], targetPosition)) + "m"));
             sendKeyValueFeedback(context, Component.literal("Mode: "), runningModeText);
             if(targetVehicle.isManual && targetVehicle.isCurrentlyManual) {
                 sendKeyValueFeedback(context, Component.literal("Switching to ATO in: "), manualTimeRemainingText);
