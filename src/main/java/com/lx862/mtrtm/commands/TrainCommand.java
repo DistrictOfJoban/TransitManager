@@ -6,6 +6,7 @@ import com.lx862.mtrtm.util.DepartureIndexHelper;
 import com.lx862.mtrtm.util.MtrUtil;
 import com.lx862.mtrtm.util.Util;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -53,25 +54,30 @@ public class TrainCommand {
                 )
                 .then(Commands.literal("jump")
                         .then(Commands.literal("siding")
-                                .executes(context -> jump(context, true, false, false, false, true))
+                                .executes(context -> jump(context, true, false, false, false, true, -1))
                         )
                         .then(Commands.literal("next")
                                 .then(Commands.literal("platform")
-                                        .executes(context -> jump(context, true, false, true, false, false))
+                                        .executes(context -> jump(context, true, false, true, false, false, -1))
                                 )
                                 .then(Commands.literal("path")
-                                        .executes(context -> jump(context, true, true, false, false, false))
+                                        .executes(context -> jump(context, true, true, false, false, false, -1))
                                 )
                                 .then(Commands.literal("stop")
-                                        .executes(context -> jump(context, true, false, false, true, false))
+                                        .executes(context -> jump(context, true, false, false, true, false, -1))
                                 )
                         )
                         .then(Commands.literal("previous")
                                 .then(Commands.literal("platform")
-                                        .executes(context -> jump(context, false, false, true, false, false))
+                                        .executes(context -> jump(context, false, false, true, false, false, -1))
                                 )
                                 .then(Commands.literal("path")
-                                        .executes(context -> jump(context, false, true, false, false, false))
+                                        .executes(context -> jump(context, false, true, false, false, false, -1))
+                                )
+                        )
+                        .then(Commands.literal("distance")
+                                .then(Commands.argument("distanceShift", IntegerArgumentType.integer())
+                                        .executes(context -> jump(context, false, false, false, false, false, IntegerArgumentType.getInteger(context, "distanceShift")))
                                 )
                         )
                 )
@@ -124,18 +130,18 @@ public class TrainCommand {
         return 1;
     }
 
-    private static int jump(CommandContext<CommandSourceStack> context, boolean next, boolean isPath, boolean isPlatform, boolean isNextStop, boolean isSiding) throws CommandSyntaxException {
+    private static int jump(CommandContext<CommandSourceStack> context, boolean next, boolean isPath, boolean isPlatform, boolean isNextStop, boolean isSiding, double distance) throws CommandSyntaxException {
         TargetVehicle targetVehicle = requireNearestVehicle(context);
 
         VehicleSchemaAccessorMixin vehicleAccessor = ((VehicleSchemaAccessorMixin)targetVehicle.vehicle);
         double currentRailProgress = vehicleAccessor.mtrtm$getRailProgress();
-        double targetDistance = -1;
+        double newRailProgress = -1;
         int pathIndex = -1;
         if(isNextStop) {
-            targetDistance = targetVehicle.vehicle.vehicleExtraData.immutablePath.get((int)vehicleAccessor.mtrtm$getNextStoppingIndexAto()).getEndDistance();
+            newRailProgress = targetVehicle.vehicle.vehicleExtraData.immutablePath.get((int)vehicleAccessor.mtrtm$getNextStoppingIndexAto()).getEndDistance();
         } else if(isSiding) {
-            targetDistance = targetVehicle.vehicle.vehicleExtraData.immutablePath.get(0).getEndDistance();
-        } else {
+            newRailProgress = targetVehicle.vehicle.vehicleExtraData.immutablePath.get(0).getEndDistance();
+        } else if(isPlatform) {
             var vehiclePath = new ObjectImmutableList<>(targetVehicle.vehicle.vehicleExtraData.immutablePath);
             boolean justOneMorePath = false;
             for(int i = 0; i < vehiclePath.size(); i++) {
@@ -153,14 +159,14 @@ public class TrainCommand {
                 if((isPlatform && isStoppablePlatform) || isPath) {
                     double dist = path.getEndDistance();
                     if(next && dist > currentRailProgress) {
-                        targetDistance = dist;
+                        newRailProgress = dist;
                         pathIndex = pIndex;
                         break;
                     }
 
                     if(!next && dist < currentRailProgress) {
                         if((targetVehicle.speedKmh == 0) || isPlatform || (targetVehicle.speedKmh > 0 && justOneMorePath) /* 1 more path if train is running */) {
-                            targetDistance = dist;
+                            newRailProgress = dist;
                             pathIndex = pIndex;
                             break;
                         }
@@ -169,12 +175,14 @@ public class TrainCommand {
                     }
                 }
             }
+        } else {
+            newRailProgress = currentRailProgress + distance;
         }
 
-        if(targetDistance != -1) {
-            final double finalTargetDistance = Math.round(targetDistance);
+        if(newRailProgress != -1) {
+            final double finalTargetDistance = Math.round(newRailProgress);
             vehicleAccessor.mtrtm$setNextStoppingIndexAto(Math.max(pathIndex, vehicleAccessor.mtrtm$getNextStoppingIndexAto()));
-            vehicleAccessor.mtrtm$setRailProgress(targetDistance);
+            vehicleAccessor.mtrtm$setRailProgress(newRailProgress);
             ((VehicleExtraDataAccessorMixin)targetVehicle.vehicle.vehicleExtraData).mtrtm$forceUpdate(true);
             context.getSource().sendSuccess(() -> Component.literal("Jumped to distance " + finalTargetDistance + "m.").withStyle(ChatFormatting.GREEN), false);
         } else {
