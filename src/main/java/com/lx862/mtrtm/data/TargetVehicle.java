@@ -46,7 +46,7 @@ public class TargetVehicle {
     }
 
     private long getTotalDwellTime() {
-        int railIndex = Utilities.getIndexFromConditionalList(vehicle.vehicleExtraData.immutablePath, ((VehicleSchemaAccessorMixin)vehicle).mtrtm$getRailProgress() - 1F);
+        int railIndex = Utilities.getIndexFromConditionalList(vehicle.vehicleExtraData.immutablePath, Math.max(0, ((VehicleSchemaAccessorMixin)vehicle).mtrtm$getRailProgress() - 1F));
         if(railIndex < vehicle.vehicleExtraData.immutablePath.size()) {
             PathData path = vehicle.vehicleExtraData.immutablePath.get(railIndex);
             if(path != null) {
