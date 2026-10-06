@@ -292,6 +292,11 @@ public class TrainCommand {
 
             final String depotSidingName = IGui.formatStationName(depot.getName())  + " (Siding " + siding.getName() + ")";
 
+            MutableComponent consistConfigurationText = Component.literal("");
+            for(VehicleCar car : targetVehicle.vehicle.vehicleExtraData.immutableVehicleCars) {
+                consistConfigurationText.append(car.getVehicleId() + " (" + car.getLength() + "m)\n");
+            }
+
             MutableComponent manualTimeRemainingText = Component.literal(Util.getReadableTimeMs(targetVehicle.manualCooldownMs)).withStyle(ChatFormatting.GREEN);
             MutableComponent distanceToStopText = Component.literal(Math.round(targetVehicle.vehicle.vehicleExtraData.getStoppingPoint() - currentRailProgress) + "m").withStyle(ChatFormatting.GREEN);
             MutableComponent depotNameText = Component.literal(depotSidingName).setStyle(Style.EMPTY.withColor(depot.getColor()));
@@ -322,6 +327,7 @@ public class TrainCommand {
             }
 
             context.getSource().sendSuccess(() -> Component.literal("===== " + title + " =====").withStyle(ChatFormatting.GREEN), false);
+            context.getSource().sendSuccess(() -> Component.literal("Consists: (Hover Here)").setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, consistConfigurationText.withStyle(ChatFormatting.GREEN)))), false);
             Util.sendKeyValueFeedback(context, Component.literal("Rail Progress: "), Component.literal(String.format("%.1f", currentRailProgress) + "m").withStyle(ChatFormatting.GREEN));
             Util.sendKeyValueFeedback(context, Component.literal("Distance to stop: "), distanceToStopText);
             Util.sendKeyValueFeedback(context, Component.literal("Relative distance: "), Component.literal(Math.round(Util.getManhattenDistance(targetVehicle.positions[targetVehicle.closestCar], targetPosition)) + "m").withStyle(ChatFormatting.GREEN));
