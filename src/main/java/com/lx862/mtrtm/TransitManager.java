@@ -16,6 +16,7 @@ import java.util.List;
 public class TransitManager implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("TransitManager");
     public static final List<Simulator> frozenTsc = new ArrayList<>();
+    public static final List<String> playersHiddenFromTsm = new ArrayList<>();
 
     @Override
     public void onInitialize() {

@@ -10,6 +10,7 @@
     "NameColorDataBaseSchemaAccessorMixin",
     "SidingAccessorMixin",
     "SimulatorMixin",
+    "SystemMapServletMixin",
     "VehicleAccessorMixin",
     "VehicleExtraDataAccessorMixin",
     "VehicleSchemaAccessorMixin"

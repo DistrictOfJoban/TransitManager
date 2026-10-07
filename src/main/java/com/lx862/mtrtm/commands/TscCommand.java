@@ -6,11 +6,13 @@ import com.lx862.mtrtm.mixin.MainAccessorMixin;
 import com.lx862.mtrtm.util.MtrUtil;
 import com.lx862.mtrtm.util.Util;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import org.mtr.core.Main;
 import org.mtr.core.simulation.Simulator;
 import org.mtr.mapping.holder.*;
@@ -89,6 +91,26 @@ public class TscCommand {
                     })
                 )
             )
+            .then(Commands.literal("map")
+                    .then(Commands.literal("hide")
+                            .then(Commands.argument("player", EntityArgument.player())
+                                    .executes(ctx -> toggleTsmVisibility(ctx, EntityArgument.getPlayer(ctx, "player")))
+                            )
+                            .executes(ctx -> toggleTsmVisibility(ctx, ctx.getSource().getPlayerOrException()))
+                    )
+            )
         );
+    }
+
+    private static int toggleTsmVisibility(CommandContext<CommandSourceStack> ctx, Player player) {
+        String uuid = player.getStringUUID();
+        if(TransitManager.playersHiddenFromTsm.contains(uuid)) {
+            TransitManager.playersHiddenFromTsm.remove(uuid);
+            ctx.getSource().sendSuccess(() -> Component.literal("Player now visible in Transport System Map!").withStyle(ChatFormatting.GREEN), true);
+        } else {
+            TransitManager.playersHiddenFromTsm.add(uuid);
+            ctx.getSource().sendSuccess(() -> Component.literal("Player now hidden from Transport System Map!").withStyle(ChatFormatting.GREEN), true);
+        }
+        return 1;
     }
 }
