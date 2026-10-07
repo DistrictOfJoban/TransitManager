@@ -7,6 +7,7 @@ public class Commands {
     public static void registerCommands(CommandDispatcher<net.minecraft.commands.CommandSourceStack> dispatcher) {
         TrainCommand.register(dispatcher);
         PlatformCommand.register(dispatcher);
+        SidingCommand.register(dispatcher);
         WarpCommands.register(dispatcher);
         TscCommand.register(dispatcher);
     }

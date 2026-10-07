@@ -35,7 +35,7 @@ public class PlatformCommand {
                     BlockPos playerBlockPos = player.getBlockPos();
                     Position playerPos = new Position(playerBlockPos.getX(), playerBlockPos.getY(), playerBlockPos.getZ());
 
-                    Platform platform = data.platforms.stream().filter(plat -> plat.closeTo(playerPos, 5)).findFirst().orElse(null);
+                    Platform platform = data.platforms.stream().filter(rail -> rail.closeTo(playerPos, 5)).findFirst().orElse(null);
 
                     if(platform == null) {
                         context.getSource().sendFailure(TextHelper.literal("No nearby platform found.").data);
