@@ -14,8 +14,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import it.unimi.dsi.fastutil.objects.ObjectImmutableList;
-import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
-import net.minecraft.core.BlockPos;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.network.chat.*;
 import net.minecraft.world.phys.Vec3;
 import org.mtr.libraries.it.unimi.dsi.fastutil.longs.LongArrayList;
@@ -91,9 +90,11 @@ public class TrainCommand {
         dispatcher.register(
                 Commands.literal("train_at")
                         .requires(ctx -> ctx.hasPermission(2))
-                        .then(Commands.argument("pos", BlockPosArgument.blockPos())
-                                .redirect(trainNode)
-                                .executes(TrainCommand::printVehicleInfo)
+                        .then(Commands.argument("pos", Vec3Argument.vec3())
+                                .redirect(trainNode, ctx -> ctx.getSource().withPosition(Vec3Argument.getVec3(ctx, "pos")))
+                                .executes(ctx -> {
+                                    return TrainCommand.printVehicleInfo(ctx.copyFor(ctx.getSource().withPosition(Vec3Argument.getVec3(ctx, "pos"))));
+                                })
                         )
         );
     }
@@ -247,7 +248,8 @@ public class TrainCommand {
         ServerPlayer player = context.getSource().getPlayer();
         Main tsc = InitAccessorMixin.mtrtm$getMain();
         Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), context.getSource().getLevel());
-        Vector targetPosition = getPos(context);
+        Vec3 pos = context.getSource().getPosition();
+        Vector targetPosition = Util.toVector(pos);
 
         TargetVehicle targetVehicle = MtrUtil.getNearestTrain(player, targetPosition, simulator);
 
@@ -257,11 +259,11 @@ public class TrainCommand {
         return targetVehicle;
     }
 
-    public static int printVehicleInfo(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    public static int printVehicleInfo(CommandContext<CommandSourceStack> context) {
         try {
             Main tsc = InitAccessorMixin.mtrtm$getMain();
             Simulator simulator = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), context.getSource().getLevel());
-            Vector targetPosition = getPos(context);
+            Vector targetPosition = Util.toVector(context.getSource().getPosition());
             TargetVehicle targetVehicle = requireNearestVehicle(context);
             double currentRailProgress = ((VehicleSchemaAccessorMixin)targetVehicle.vehicle).mtrtm$getRailProgress();
 
@@ -394,14 +396,5 @@ public class TrainCommand {
         } else {
             return Component.literal("On-Time").withStyle(ChatFormatting.GREEN);
         }
-    }
-
-    private static Vector getPos(CommandContext<CommandSourceStack> ctx) {
-        try {
-            return Util.toVector(BlockPosArgument.getBlockPos(ctx, "pos").getCenter());
-        } catch (Exception e) {
-        }
-
-        return Util.toVector(ctx.getSource().getPosition());
     }
 }

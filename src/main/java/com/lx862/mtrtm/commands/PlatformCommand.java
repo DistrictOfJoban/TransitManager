@@ -5,11 +5,14 @@ import com.lx862.mtrtm.mixin.MainAccessorMixin;
 import com.lx862.mtrtm.util.MtrUtil;
 import com.lx862.mtrtm.util.Util;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 import org.mtr.core.Main;
 import org.mtr.core.data.Platform;
 import org.mtr.core.data.Position;
@@ -23,19 +26,16 @@ import java.util.ArrayList;
 public class PlatformCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("platform")
+        CommandNode<CommandSourceStack> node = dispatcher.register(Commands.literal("platform")
                 .requires(ctx -> ctx.hasPermission(2))
                 .executes(context -> {
-                    ServerPlayer rawPlayer = context.getSource().getPlayerOrException();
-                    ServerPlayerEntity player = new ServerPlayerEntity(rawPlayer);
-
                     Main tsc = InitAccessorMixin.mtrtm$getMain();
                     Simulator data = MtrUtil.getSimulator(((MainAccessorMixin)tsc).mtrtm$getSimulators(), context.getSource().getLevel());
 
-                    BlockPos playerBlockPos = player.getBlockPos();
-                    Position playerPos = new Position(playerBlockPos.getX(), playerBlockPos.getY(), playerBlockPos.getZ());
+                    Vec3 pos = context.getSource().getPosition();
+                    Position tscPos = new Position((long)pos.x(), (long)pos.y(), (long)pos.z());
 
-                    Platform platform = data.platforms.stream().filter(rail -> rail.closeTo(playerPos, 5)).findFirst().orElse(null);
+                    Platform platform = data.platforms.stream().filter(rail -> rail.closeTo(tscPos, 5)).findFirst().orElse(null);
 
                     if(platform == null) {
                         context.getSource().sendFailure(TextHelper.literal("No nearby platform found.").data);
@@ -56,12 +56,22 @@ public class PlatformCommand {
                     }
 
                     HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, TextHelper.setStyle(TextHelper.literal(String.join("\n", routeList)), Style.getEmptyMapped().withColor(TextFormatting.GREEN)).data);
-                    player.sendMessage(Text.cast(TextHelper.setStyle(TextHelper.literal("===== Platform " + platform.getName() + " ====="), Style.getEmptyMapped().withColor(TextColor.fromRgb(0x862F2B)))), false);
-                    player.sendMessage(Text.cast(TextHelper.setStyle(TextHelper.literal("Dwell: " + Util.getReadableTimeMs(platform.getDwellTime())), Style.getEmptyMapped().withColor(TextFormatting.GOLD))), false);
-                    player.sendMessage(Text.cast(TextHelper.setStyle(TextHelper.literal("Transport Type: " + platform.getTransportMode().toString().toLowerCase()), Style.getEmptyMapped().withColor(TextFormatting.GOLD))), false);
-                    player.sendMessage(Text.cast(TextHelper.setStyle(TextHelper.literal("Route List: (Hover)"), new Style(Style.getEmptyMapped().data.withColor(ChatFormatting.GOLD).withUnderlined(true).withHoverEvent(hoverEvent)))), false);
+                    context.getSource().sendSuccess(() -> Text.cast(TextHelper.setStyle(TextHelper.literal("===== Platform " + platform.getName() + " ====="), Style.getEmptyMapped().withColor(TextColor.fromRgb(0x862F2B)))).data, false);
+                    context.getSource().sendSuccess(() -> Text.cast(TextHelper.setStyle(TextHelper.literal("Dwell: " + Util.getReadableTimeMs(platform.getDwellTime())), Style.getEmptyMapped().withColor(TextFormatting.GOLD))).data, false);
+                    context.getSource().sendSuccess(() -> Text.cast(TextHelper.setStyle(TextHelper.literal("Transport Type: " + platform.getTransportMode().toString().toLowerCase()), Style.getEmptyMapped().withColor(TextFormatting.GOLD))).data, false);
+                    context.getSource().sendSuccess(() -> Text.cast(TextHelper.setStyle(TextHelper.literal("Route List: (Hover)"), new Style(Style.getEmptyMapped().data.withColor(ChatFormatting.GOLD).withUnderlined(true).withHoverEvent(hoverEvent)))).data, false);
                     return 1;
                 })
+        );
+
+        dispatcher.register(Commands.literal("platform_at")
+                .requires(ctx -> ctx.hasPermission(2))
+                        .then(Commands.argument("pos", Vec3Argument.vec3())
+                            .redirect(node, ctx -> ctx.getSource().withPosition(Vec3Argument.getVec3(ctx, "pos")))
+                            .executes((ctx) -> {
+                                return node.getCommand().run(ctx.copyFor(ctx.getSource().withPosition(Vec3Argument.getVec3(ctx, "pos"))));
+                            })
+                        )
         );
     }
 }
