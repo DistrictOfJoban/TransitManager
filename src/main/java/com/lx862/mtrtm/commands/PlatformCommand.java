@@ -20,8 +20,10 @@ import org.mtr.core.data.Route;
 import org.mtr.core.simulation.Simulator;
 import org.mtr.mapping.holder.*;
 import org.mtr.mapping.mapper.TextHelper;
+import org.mtr.mod.client.MinecraftClientData;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class PlatformCommand {
 
@@ -35,7 +37,10 @@ public class PlatformCommand {
                     Vec3 pos = context.getSource().getPosition();
                     Position tscPos = new Position((long)pos.x(), (long)pos.y(), (long)pos.z());
 
-                    Platform platform = data.platforms.stream().filter(rail -> rail.closeTo(tscPos, 5)).findFirst().orElse(null);
+                    Platform platform = data.platforms.stream()
+                            .filter(rail -> rail.closeTo(tscPos, 5))
+                            .min(Comparator.comparingDouble((rail) -> rail.getApproximateClosestDistance(tscPos, MinecraftClientData.getInstance())))
+                            .orElse(null);
 
                     if(platform == null) {
                         context.getSource().sendFailure(TextHelper.literal("No nearby platform found.").data);

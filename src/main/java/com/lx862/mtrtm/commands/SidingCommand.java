@@ -24,8 +24,10 @@ import org.mtr.core.tool.Utilities;
 import org.mtr.libraries.it.unimi.dsi.fastutil.longs.LongArrayList;
 import org.mtr.mapping.holder.*;
 import org.mtr.mapping.mapper.TextHelper;
+import org.mtr.mod.client.MinecraftClientData;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class SidingCommand {
@@ -56,10 +58,9 @@ public class SidingCommand {
             Position tscPos = new Position((long)vec3.x(), (long)vec3.y(), (long)vec3.z());
 
             // TODO: PICK UP - User friendly dump / siding info
-            // TODO: Sort it by distance in case we have multiple matches
             Siding siding = data.sidings.stream()
                     .filter(rail -> rail.closeTo(tscPos, 5))
-                    .findFirst()
+                    .min(Comparator.comparingDouble((rail) -> rail.getApproximateClosestDistance(tscPos, MinecraftClientData.getInstance())))
                     .orElse(null);
 
             if(siding == null) {
@@ -126,7 +127,7 @@ public class SidingCommand {
                                 routePlatformIndex++;
                             }
                         }
-                    } else { // TBS
+                    } else if(path.getDwellTime() == 1) { // TBS
                         double arrivalTime = siding.getTimeAlongRoute(path.getEndDistance());
                         double departureTime = arrivalTime + path.getDwellTime();
                         JourneyCheckpoint journeyCheckpoint = new JourneyCheckpoint(null, runningRouteId, "TBS", arrivalTime, departureTime, true, false);
@@ -159,15 +160,6 @@ public class SidingCommand {
         } catch (Exception e) {
             e.printStackTrace();
             return 0;
-        }
-    }
-
-    private static BlockPos getPos(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        try {
-            return new BlockPos(BlockPosArgument.getBlockPos(ctx, "pos"));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new BlockPos(ctx.getSource().getPlayerOrException().blockPosition());
         }
     }
 
