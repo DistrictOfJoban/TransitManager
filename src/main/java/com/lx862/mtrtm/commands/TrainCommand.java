@@ -84,6 +84,9 @@ public class TrainCommand {
                                 )
                         )
                 )
+                .then(Commands.literal("skipManualDrivingTimeout")
+                        .executes(TrainCommand::skipManualDrivingTimeout)
+                )
                 .executes(TrainCommand::printVehicleInfo)
         );
 
@@ -232,6 +235,14 @@ public class TrainCommand {
 
         ((VehicleSchemaAccessorMixin)targetVehicle.vehicle).mtrtm$setElapsedDwellTime(0);
         context.getSource().sendSuccess(() -> Component.literal("Dwell time reset! " + Util.getReadableTimeMs(targetVehicle.totalDwellTime) + " left.").withStyle(ChatFormatting.GREEN), false);
+        return 1;
+    }
+
+    private static int skipManualDrivingTimeout(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        TargetVehicle targetVehicle = requireNearestVehicle(context);
+
+        ((VehicleAccessorMixin)targetVehicle.vehicle).mtrtm$setManualCooldown(0);
+        context.getSource().sendSuccess(() -> Component.literal("Skipped manual driving timeout!").withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 

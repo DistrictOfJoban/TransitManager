@@ -15,6 +15,9 @@ public interface VehicleAccessorMixin {
     @Accessor("manualCooldown")
     long mtrtm$getManualCooldown();
 
+    @Accessor("manualCooldown")
+    void mtrtm$setManualCooldown(long value);
+
     @Accessor("deviation")
     long mtrtm$getDeviation();
 }
